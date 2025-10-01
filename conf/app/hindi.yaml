@@ -1,0 +1,5 @@
+ocr_config:
+  _target_: app_config.ocr_config.OCRConfig
+  languages: ["hin"]
+  force_full_page_ocr: true
+  ocr_engine: tesseract_cli_ocr
