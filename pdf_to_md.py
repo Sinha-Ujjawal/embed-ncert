@@ -21,7 +21,7 @@ def main() -> None:
     app_config = AppConfig.from_yaml(args.conf)
     opts = app_config.docling_pdf_pipeline_options
     print(f"{opts=}")
-    converter = app_config.docling_pdf_converter
+    converter = app_config.docling_pdf_converter()
     document = converter.convert(args.pdf).document
     print(document.export_to_markdown())
 

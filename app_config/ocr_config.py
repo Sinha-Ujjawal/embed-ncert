@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from enum import StrEnum
-from functools import cached_property
 from typing import Any
 
 from docling.datamodel.pipeline_options import (EasyOcrOptions, OcrOptions,
@@ -23,7 +22,6 @@ class OCRConfig:
     ocr_engine: OcrEngine
     ocr_engine_conf: dict[str, Any] = field(default_factory=lambda: {})
 
-    @cached_property
     def docling_ocr_options(self) -> OcrOptions:
         if self.ocr_engine == OcrEngine.EASY_OCR:
             cls = EasyOcrOptions

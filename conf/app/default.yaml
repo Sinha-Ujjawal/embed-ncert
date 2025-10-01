@@ -3,16 +3,20 @@ _target_: app_config.app_config.AppConfig
 ocr_config:
   _target_: app_config.ocr_config.OCRConfig
   languages: ["eng"]
-  force_full_page_ocr: false
+  force_full_page_ocr: true
   ocr_engine: tesseract_cli_ocr
 
-vlm_config:
-  _target_: app_config.vlm_config.VLMConfig
+picture_desc_config:
+  _target_: app_config.picture_desc_config.PictureDescriptionVlmConfig
   repo_id: "ibm-granite/granite-docling-258M"
-  prompt: "Describe this image in a few sentences. You must describe something. Do extensive analysis of it."
+  prompt: "Describe this image in a few sentences."
+  generation_config:
+    min_tokens: 100
+    max_new_tokens: 200
+    do_sample: false
 
 generate_page_images: true
-images_scale: 1.0
+images_scale: 2.0
 # Enrichments
 do_formula_enrichment: false
 do_table_structure: false
