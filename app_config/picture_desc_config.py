@@ -16,9 +16,9 @@ class PictureDescriptionApiConfig:
     url: str = "http://localhost:8000/v1/chat/completions"
     headers: dict[str, str] = field(default_factory=lambda: {})
     params: dict[str, Any] = field(default_factory=lambda: {})
-    timeout: float = 20
+    timeout: float = 300
     concurrency: int = 1
-    prompt: str = "Describe this image in a few sentences."
+    prompt: str = "Describe this image in detail. Don't miss out any details."
     provenance: str = ""
 
     def docling_picture_description_options(self) -> PictureDescriptionApiOptions:

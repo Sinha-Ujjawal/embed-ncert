@@ -10,7 +10,8 @@ from load_dotenv import load_dotenv
 from omegaconf import OmegaConf
 
 from app_config.ocr_config import OCRConfig
-from app_config.picture_desc_config import PictureDescriptionConfig
+from app_config.picture_desc_config import (PictureDescriptionApiOptions,
+                                            PictureDescriptionConfig)
 
 DEFAULT_CONFIG = Path(__file__).parent.parent / "conf/app/default.yaml"
 
@@ -53,6 +54,10 @@ class AppConfig:
             options.picture_description_options = (
                 self.picture_desc_config.docling_picture_description_options()
             )
+            if isinstance(
+                options.picture_description_options, PictureDescriptionApiOptions
+            ):
+                options.enable_remote_services = True
         options.generate_page_images = self.generate_page_images
         options.images_scale = self.images_scale
         # Enrichments

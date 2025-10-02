@@ -7,13 +7,18 @@ ocr_config:
   ocr_engine: tesseract_cli_ocr
 
 picture_desc_config:
-  _target_: app_config.picture_desc_config.PictureDescriptionVlmConfig
-  repo_id: "ibm-granite/granite-docling-258M"
-  prompt: "Describe this image in a few sentences."
-  generation_config:
-    min_tokens: 100
-    max_new_tokens: 200
-    do_sample: false
+  # _target_: app_config.picture_desc_config.PictureDescriptionVlmConfig
+  # repo_id: "ibm-granite/granite-docling-258M"
+  # prompt: "Describe this image in a few sentences."
+  # generation_config:
+  #   min_tokens: 100
+  #   max_new_tokens: 200
+  #   do_sample: false
+  _target_: app_config.picture_desc_config.PictureDescriptionApiConfig
+  url: "http://localhost:11434/v1/chat/completions"
+  params:
+    model: granite3.2-vision:2b
+    temperature: 0
 
 generate_page_images: true
 images_scale: 2.0
