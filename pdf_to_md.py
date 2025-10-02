@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 from load_dotenv import load_dotenv
 
@@ -17,13 +18,21 @@ def main() -> None:
         help="Config yaml file to use. See conf/application folder for examples",
     )
     parser.add_argument("--pdf", required=True, help="Path of the pdf file to process")
+    parser.add_argument(
+        "--out", required=False, help="Path of the output markdown file"
+    )
     args = parser.parse_args()
     app_config = AppConfig.from_yaml(args.conf)
     opts = app_config.docling_pdf_pipeline_options
     print(f"{opts=}")
     converter = app_config.docling_pdf_converter()
     document = converter.convert(args.pdf).document
-    print(document.export_to_markdown())
+    if args.out:
+        print(f"Writing to {args.out}")
+        Path(args.out).write_text(document.export_to_markdown())
+    else:
+        print(document.export_to_markdown())
+    print("Done")
 
 
 if __name__ == "__main__":

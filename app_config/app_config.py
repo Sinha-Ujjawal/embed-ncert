@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -5,12 +6,15 @@ from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from hydra.utils import instantiate
+from load_dotenv import load_dotenv
 from omegaconf import OmegaConf
 
 from app_config.ocr_config import OCRConfig
 from app_config.picture_desc_config import PictureDescriptionConfig
 
 DEFAULT_CONFIG = Path(__file__).parent.parent / "conf/app/default.yaml"
+
+load_dotenv()
 
 
 @dataclass
@@ -37,7 +41,9 @@ class AppConfig:
         return obj
 
     def docling_pdf_pipeline_options(self) -> PdfPipelineOptions:
-        options = PdfPipelineOptions(do_ocr=False)
+        options = PdfPipelineOptions(
+            do_ocr=False, artifacts_path=os.environ.get("DOCLING_ARTIFACTS_PATH")
+        )
         if self.ocr_config:
             options.do_ocr = True
             options.ocr_options = self.ocr_config.docling_ocr_options()
