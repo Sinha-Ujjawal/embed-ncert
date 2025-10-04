@@ -1,11 +1,19 @@
 _target_: app_config.app_config.AppConfig
 
 ocr_config:
-  _target_: app_config.ocr_config.OCRConfig
+  _target_: app_config.ocr_config.StandardOCRConfig
   languages: ["eng"]
   force_full_page_ocr: true
   ocr_engine: tesseract_cli_ocr
+  # Enrichments
+  do_formula_enrichment: false
+  do_table_structure: true
+  do_code_enrichment: false
 
+generate_page_images: true
+images_scale: 2.0
+
+# Enrichments
 picture_desc_config:
   # _target_: app_config.picture_desc_config.PictureDescriptionVlmConfig
   # repo_id: "ibm-granite/granite-docling-258M"
@@ -16,13 +24,9 @@ picture_desc_config:
   #   do_sample: false
   _target_: app_config.picture_desc_config.PictureDescriptionApiConfig
   url: "http://localhost:11434/v1/chat/completions"
+  prompt: "Describe this image in detail. Don't miss out any details."
   params:
     model: granite3.2-vision:2b
     temperature: 0
 
-generate_page_images: true
-images_scale: 2.0
-# Enrichments
-do_formula_enrichment: false
-do_table_structure: false
-do_code_enrichment: false
+formula_analyser: null

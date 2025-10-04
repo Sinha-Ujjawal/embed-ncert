@@ -1,2 +1,17 @@
-do_formula_enrichment: true
-do_table_structure: true
+ocr_config:
+  _target_: app_config.ocr_config.StandardOCRConfig
+  languages: ["eng", "equ"]
+  force_full_page_ocr: true
+  ocr_engine: tesseract_cli_ocr
+  do_formula_enrichment: true
+  do_table_structure: true
+
+formula_analyser:
+  _target_: app_config.formula_understanding_pipeline.FormulaUnderstandingAnalyserOpenAIApi
+  url: "http://localhost:11434/v1/chat/completions"
+  prompt: "Extract the LaTeX code from this image. Output only the LaTeX formula, nothing else. If no mathematical formula is found, output nothing. If more than one formula, then output all formula seperated by new lines. Don't miss any detail please."
+  params:
+    model: granite3.2-vision:2b
+    temperature: 0
+  concurrency: 1
+  timeout: 180

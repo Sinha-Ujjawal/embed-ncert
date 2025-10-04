@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
-from docling.datamodel.pipeline_options import (AnyUrl,
-                                                PictureDescriptionApiOptions,
-                                                PictureDescriptionBaseOptions,
-                                                PictureDescriptionVlmOptions)
+from docling.datamodel.pipeline_options import (
+    AnyUrl,
+    PictureDescriptionApiOptions,
+    PictureDescriptionBaseOptions,
+    PictureDescriptionVlmOptions,
+)
 
 
 class PictureDescriptionConfig(Protocol):
@@ -13,13 +15,13 @@ class PictureDescriptionConfig(Protocol):
 
 @dataclass(slots=True)
 class PictureDescriptionApiConfig:
-    url: str = "http://localhost:8000/v1/chat/completions"
+    url: str = 'http://localhost:8000/v1/chat/completions'
     headers: dict[str, str] = field(default_factory=lambda: {})
     params: dict[str, Any] = field(default_factory=lambda: {})
     timeout: float = 300
     concurrency: int = 1
     prompt: str = "Describe this image in detail. Don't miss out any details."
-    provenance: str = ""
+    provenance: str = ''
 
     def docling_picture_description_options(self) -> PictureDescriptionApiOptions:
         return PictureDescriptionApiOptions(

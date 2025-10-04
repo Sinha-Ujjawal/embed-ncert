@@ -14,4 +14,3 @@ fi
 # Assuming DOCLING_ARTIFACTS_PATH is present
 
 "$SCRIPT_DIR"/.venv/bin/docling-tools models download -o $DOCLING_ARTIFACTS_PATH/
-"$SCRIPT_DIR"/.venv/bin/docling-tools models download-hf-repo ibm-granite/granite-docling-258M -o $DOCLING_ARTIFACTS_PATH/
