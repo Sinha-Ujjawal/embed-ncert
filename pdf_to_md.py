@@ -3,7 +3,7 @@ from pathlib import Path
 
 from load_dotenv import load_dotenv
 
-from app_config.app_config import AppConfig
+from app_config import AppConfig
 
 load_dotenv()
 
@@ -22,9 +22,9 @@ def main() -> None:
     args = parser.parse_args()
     app_config = AppConfig.from_yaml(args.conf)
     print(f'{app_config=}')
-    opts = app_config.docling_paginated_pipeline_cls_and_options()
+    opts = app_config.docling_config.docling_paginated_pipeline_cls_and_options()
     print(f'{opts=}')
-    converter = app_config.docling_pdf_converter()
+    converter = app_config.docling_config.docling_pdf_converter()
     document = converter.convert(args.pdf).document
     if args.out:
         print(f'Writing to {args.out}')

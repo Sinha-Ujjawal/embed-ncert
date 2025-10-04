@@ -1,32 +1,44 @@
-_target_: app_config.app_config.AppConfig
+_target_: app_config.AppConfig
 
-ocr_config:
-  _target_: app_config.ocr_config.StandardOCRConfig
-  languages: ["eng"]
-  force_full_page_ocr: true
-  ocr_engine: tesseract_cli_ocr
+docling_config:
+  _target_: app_config.docling_config.DoclingConfig
+  ocr_config:
+    _target_: app_config.docling_config.ocr_config.StandardOCRConfig
+    languages: ["eng"]
+    force_full_page_ocr: true
+    ocr_engine: tesseract_cli_ocr
+    # Enrichments
+    do_formula_enrichment: false
+    do_table_structure: true
+    do_code_enrichment: false
+
+  generate_page_images: true
+  images_scale: 2.0
+
   # Enrichments
-  do_formula_enrichment: false
-  do_table_structure: true
-  do_code_enrichment: false
+  picture_desc_config:
+    # _target_: app_config.docling_config.picture_desc_config.PictureDescriptionVlmConfig
+    # repo_id: "ibm-granite/granite-docling-258M"
+    # prompt: "Describe this image in a few sentences."
+    # generation_config:
+    #   min_tokens: 100
+    #   max_new_tokens: 200
+    #   do_sample: false
+    _target_: app_config.docling_config.picture_desc_config.PictureDescriptionApiConfig
+    url: "http://localhost:11434/v1/chat/completions"
+    prompt: "Describe this image in detail. Don't miss out any details."
+    params:
+      model: granite3.2-vision:2b
+      temperature: 0
 
-generate_page_images: true
-images_scale: 2.0
+  formula_analyser: null
 
-# Enrichments
-picture_desc_config:
-  # _target_: app_config.picture_desc_config.PictureDescriptionVlmConfig
-  # repo_id: "ibm-granite/granite-docling-258M"
-  # prompt: "Describe this image in a few sentences."
-  # generation_config:
-  #   min_tokens: 100
-  #   max_new_tokens: 200
-  #   do_sample: false
-  _target_: app_config.picture_desc_config.PictureDescriptionApiConfig
-  url: "http://localhost:11434/v1/chat/completions"
-  prompt: "Describe this image in detail. Don't miss out any details."
-  params:
-    model: granite3.2-vision:2b
-    temperature: 0
+embedding_config:
+  _target_: app_config.embedding_config.OllamaEmbeddingConfig
+  model: "embeddinggemma:300m"
+  base_url: "http://127.0.0.1:11434/"
 
-formula_analyser: null
+vector_store_config:
+  _target_: app_config.vector_store_config.QdrantVectorStoreConfig
+  url: http://localhost:6333
+  collection_name: default

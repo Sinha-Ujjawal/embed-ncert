@@ -1,6 +1,10 @@
-ocr_config:
-  _target_: app_config.ocr_config.StandardOCRConfig
-  languages: ["hin"]
-  force_full_page_ocr: true
-  ocr_engine: tesseract_cli_ocr
-  do_table_structure: true
+docling_config:
+  ocr_config:
+    _target_: app_config.docling_config.ocr_config.StandardOCRConfig
+    languages: ["hin"]
+    force_full_page_ocr: true
+    ocr_engine: tesseract_cli_ocr
+    do_table_structure: true
+
+vector_store_config:
+  collection_name: hindi
