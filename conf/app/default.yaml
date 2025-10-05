@@ -28,8 +28,10 @@ docling_config:
     url: "http://localhost:11434/v1/chat/completions"
     prompt: "Describe this image in detail. Don't miss out any details."
     params:
-      model: granite3.2-vision:2b
+      # model: granite3.2-vision:2b
+      model: gemma3:4b
       temperature: 0
+    timeout: 1800
 
   formula_analyser: null
 
