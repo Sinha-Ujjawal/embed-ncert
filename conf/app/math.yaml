@@ -1,22 +1,32 @@
-docling_config:
-  ocr_config:
-    _target_: app_config.docling_config.ocr_config.StandardOCRConfig
-    languages: ["eng", "equ"]
-    force_full_page_ocr: true
-    ocr_engine: tesseract_cli_ocr
-    do_formula_enrichment: true
-    do_table_structure: true
+# docling_config:
+  # ocr_config:
+  #   # _target_: app_config.docling_config.ocr_config.StandardOCRConfig
+  #   # languages: ["eng", "equ"]
+  #   # force_full_page_ocr: true
+  #   # ocr_engine: tesseract_cli_ocr
+  #   # do_formula_enrichment: true
+  #   # do_table_structure: true
+  #   _target_: app_config.docling_config.ocr_config.VlmOCRConfig
+  #   prompt: "OCR this image"
+  #   vlm_config:
+  #     _target_: app_config.docling_config.ocr_config.ApiVlmConfig
+  #     url: "http://localhost:11434/v1/chat/completions"
+  #     params:
+  #       model: openbmb/minicpm-v4.5
+  #       temperature: 0
+  #     timeout: 1800
 
-  formula_analyser:
-    _target_: app_config.docling_config.formula_understanding_pipeline.FormulaUnderstandingAnalyserOpenAIApi
-    url: "http://localhost:11434/v1/chat/completions"
-    prompt: "Extract the LaTeX code from this image. Output only the LaTeX formula, nothing else. If no mathematical formula is found, output nothing. If more than one formula, then output all formula seperated by new lines. Don't miss any detail please."
-    params:
-      # model: granite3.2-vision:2b
-      model: gemma3:4b
-      temperature: 0
-    concurrency: 1
-    timeout: 1800  # 30 minutes
+  # formula_analyser:
+  #   _target_: app_config.docling_config.formula_understanding_pipeline.FormulaUnderstandingAnalyserOpenAIApi
+  #   url: "http://localhost:11434/v1/chat/completions"
+  #   prompt: "Extract the LaTeX code from this image. Output only the LaTeX formula, nothing else. If no mathematical formula is found, output nothing. If more than one formula, then output all formula seperated by new lines. Don't miss any detail please."
+  #   params:
+  #     # model: granite3.2-vision:2b
+  #     # model: gemma3:4b
+  #     model: openbmb/minicpm-v4.5
+  #     temperature: 0
+  #   concurrency: 1
+  #   timeout: 1800  # 30 minutes
 
 vector_store_config:
   collection_name: math

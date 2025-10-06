@@ -3,14 +3,23 @@ _target_: app_config.AppConfig
 docling_config:
   _target_: app_config.docling_config.DoclingConfig
   ocr_config:
-    _target_: app_config.docling_config.ocr_config.StandardOCRConfig
-    languages: ["eng"]
-    force_full_page_ocr: true
-    ocr_engine: tesseract_cli_ocr
-    # Enrichments
-    do_formula_enrichment: false
-    do_table_structure: true
-    do_code_enrichment: false
+    # _target_: app_config.docling_config.ocr_config.StandardOCRConfig
+    # languages: ["eng"]
+    # force_full_page_ocr: true
+    # ocr_engine: tesseract_cli_ocr
+    # # Enrichments
+    # do_formula_enrichment: false
+    # do_table_structure: true
+    # do_code_enrichment: false
+    _target_: app_config.docling_config.ocr_config.VlmOCRConfig
+    prompt: "OCR this image"
+    vlm_config:
+      _target_: app_config.docling_config.ocr_config.ApiVlmConfig
+      url: "http://localhost:11434/v1/chat/completions"
+      params:
+        model: openbmb/minicpm-v4.5
+        temperature: 0
+      timeout: 1800
 
   generate_page_images: true
   images_scale: 2.0
@@ -29,7 +38,8 @@ docling_config:
     prompt: "Describe this image in detail. Don't miss out any details."
     params:
       # model: granite3.2-vision:2b
-      model: gemma3:4b
+      # model: gemma3:4b
+      model: openbmb/minicpm-v4.5
       temperature: 0
     timeout: 1800
 
