@@ -39,19 +39,26 @@ class OCRConfig:
 @dataclass(slots=True)
 class InlineVlmConfig:
     repo_id: str
+    response_format: ResponseFormat
     addnl_conf: dict[str, Any] = field(default_factory=lambda: {})
 
     def vlm_options(self, *args, **kwargs) -> InlineVlmOptions:
-        return InlineVlmOptions(*args, **kwargs, repo_id=self.repo_id, **self.addnl_conf)
+        return InlineVlmOptions(
+            *args,
+            **kwargs,
+            repo_id=self.repo_id,
+            response_format=self.response_format,
+            **self.addnl_conf,
+        )
 
 
 @dataclass(slots=True)
 class ApiVlmConfig:
     url: AnyUrl
     params: dict[str, Any]
+    response_format: ResponseFormat
     concurrency: int = 1
     timeout: int = 180
-    response_format: ResponseFormat = ResponseFormat.MARKDOWN
     addnl_conf: dict[str, Any] = field(default_factory=lambda: {})
 
     def vlm_options(self, *args, **kwargs) -> ApiVlmOptions:
@@ -60,9 +67,9 @@ class ApiVlmConfig:
             **kwargs,
             url=self.url,
             params=self.params,
+            response_format=self.response_format,
             concurrency=self.concurrency,
             timeout=self.timeout,
-            response_format=self.response_format,
             **self.addnl_conf,
         )
 

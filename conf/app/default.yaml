@@ -17,9 +17,10 @@ docling_config:
       _target_: app_config.docling_config.ocr_config.ApiVlmConfig
       url: "http://localhost:11434/v1/chat/completions"
       params:
-        model: openbmb/minicpm-v4.5
+        model: openbmb/minicpm-o2.6
         temperature: 0
       timeout: 1800
+      response_format: "markdown"
 
   generate_page_images: true
   images_scale: 2.0
@@ -39,7 +40,8 @@ docling_config:
     params:
       # model: granite3.2-vision:2b
       # model: gemma3:4b
-      model: openbmb/minicpm-v4.5
+      # model: openbmb/minicpm-v4.5
+      model: openbmb/minicpm-o2.6
       temperature: 0
     timeout: 1800
 
