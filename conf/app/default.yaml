@@ -3,24 +3,14 @@ _target_: app_config.AppConfig
 docling_config:
   _target_: app_config.docling_config.DoclingConfig
   ocr_config:
-    # _target_: app_config.docling_config.ocr_config.StandardOCRConfig
-    # languages: ["eng"]
-    # force_full_page_ocr: true
-    # ocr_engine: tesseract_cli_ocr
-    # # Enrichments
-    # do_formula_enrichment: false
-    # do_table_structure: true
-    # do_code_enrichment: false
-    _target_: app_config.docling_config.ocr_config.VlmOCRConfig
-    prompt: "OCR this image"
-    vlm_config:
-      _target_: app_config.docling_config.ocr_config.ApiVlmConfig
-      url: "http://localhost:11434/v1/chat/completions"
-      params:
-        model: openbmb/minicpm-o2.6
-        temperature: 0
-      timeout: 1800
-      response_format: "markdown"
+    _target_: app_config.docling_config.ocr_config.StandardOCRConfig
+    languages: ["eng"]
+    force_full_page_ocr: true
+    ocr_engine: tesseract_cli_ocr
+    # Enrichments
+    do_formula_enrichment: false
+    do_table_structure: true
+    do_code_enrichment: false
 
   generate_page_images: true
   images_scale: 2.0
