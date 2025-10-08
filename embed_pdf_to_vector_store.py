@@ -39,9 +39,12 @@ def main() -> None:
     print(f'{app_config=}')
     converter = app_config.docling_config.docling_pdf_converter()
     file_paths = glob(args.pdf)
-    chunker = HybridChunker()
-    meta_extractor = MetaExtractor()
     embeddings = app_config.embedding_config.langchain_embedding()
+    if app_config.tokenizer_config:
+        chunker = HybridChunker(tokenizer=app_config.tokenizer_config.docling_tokenizer())
+    else:
+        chunker = HybridChunker()
+    meta_extractor = MetaExtractor()
     for file_path in file_paths:
         print(f'Embedding file: {file_path}')
         document = converter.convert(file_path).document

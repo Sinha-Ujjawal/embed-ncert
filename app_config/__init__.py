@@ -7,6 +7,7 @@ from utils.hydra_utils import instantiate_filtered
 
 from app_config.docling_config import DoclingConfig
 from app_config.embedding_config import EmbeddingConfig
+from app_config.tokenizer_config import TokenizerConfig
 from app_config.vector_store_config import VectorStoreConfig
 
 DEFAULT_CONFIG = Path(__file__).parent.parent / 'conf/app/default.yaml'
@@ -19,6 +20,7 @@ class AppConfig:
     docling_config: DoclingConfig
     embedding_config: EmbeddingConfig
     vector_store_config: VectorStoreConfig
+    tokenizer_config: TokenizerConfig | None = None
 
     @staticmethod
     def from_yaml(yaml_file: str) -> 'AppConfig':

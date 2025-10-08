@@ -28,19 +28,25 @@ docling_config:
     url: "http://localhost:11434/v1/chat/completions"
     prompt: "Describe this image in detail. Don't miss out any details."
     params:
-      # model: granite3.2-vision:2b
+      model: granite3.2-vision:2b
       # model: gemma3:4b
+      # model: gemma3:12b
       # model: openbmb/minicpm-v4.5
-      model: openbmb/minicpm-o2.6
+      # model: openbmb/minicpm-o2.6
       temperature: 0
     timeout: 1800
 
   formula_analyser: null
 
+tokenizer_config:
+  _target_: app_config.tokenizer_config.HuggingfaceTokenizerConfig
+  model: "onnx-community/embeddinggemma-300m-ONNX"
+  max_tokens: 1024
+
 embedding_config:
   _target_: app_config.embedding_config.OllamaEmbeddingConfig
   model: "embeddinggemma:300m"
-  base_url: "http://127.0.0.1:11434/"
+  base_url: "http://localhost:11434"
 
 vector_store_config:
   _target_: app_config.vector_store_config.QdrantVectorStoreConfig

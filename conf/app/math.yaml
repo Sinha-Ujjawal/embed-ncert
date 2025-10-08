@@ -19,11 +19,13 @@ docling_config:
   formula_analyser:
     _target_: app_config.docling_config.formula_understanding_pipeline.FormulaUnderstandingAnalyserOpenAIApi
     url: "http://localhost:11434/v1/chat/completions"
-    prompt: "Extract the LaTeX code from this image. Output only the LaTeX formula, nothing else. If no mathematical formula is found, output nothing. If more than one formula, then output all formula seperated by new lines. Don't miss any detail please."
+    prompt: "Extract formula from this image. If no text in image, then output nothing. Don't add any explanation or description, just output the content of the image."
     params:
-      # model: granite3.2-vision:2b
+      model: granite3.2-vision:2b
       # model: gemma3:4b
-      model: openbmb/minicpm-v4.5
+      # model: gemma3:12b
+      # model: openbmb/minicpm-v4.5
+      # model: openbmb/minicpm-o2.6
       temperature: 0
     concurrency: 1
     timeout: 1800  # 30 minutes
