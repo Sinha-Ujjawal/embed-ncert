@@ -21,11 +21,13 @@ docling_config:
     url: "http://localhost:11434/v1/chat/completions"
     prompt: "Extract formula from this image. If no text in image, then output nothing. Don't add any explanation or description, just output the content of the image."
     params:
-      model: granite3.2-vision:2b
+      # model: granite3.2-vision:2b
       # model: gemma3:4b
       # model: gemma3:12b
       # model: openbmb/minicpm-v4.5
       # model: openbmb/minicpm-o2.6
+      # model: qwen2.5vl:7b
+      model: qwen2.5vl:3b
       temperature: 0
     concurrency: 1
     timeout: 1800  # 30 minutes
