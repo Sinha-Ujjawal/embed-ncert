@@ -240,6 +240,10 @@ class FormulaUnderstandingAnalyserRapidLatexOCRCli(FormulaUnderstandingAnalyserC
         cmd = [self.cmd, img_path]
         return cmd
 
+    def format_output(self, output: str) -> str:
+        *lines, _cost = output.splitlines()
+        return '\n'.join(lines)
+
 
 class FormulaUnderstandingAnalyserEnrichmentModel(BaseItemAndImageEnrichmentModel):
     images_scale = 2.6

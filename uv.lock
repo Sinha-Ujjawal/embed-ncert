@@ -237,6 +237,18 @@ wheels = [
 ]
 
 [[package]]
+name = "colorlog"
+version = "6.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/7a/359f4d5df2353f26172b3cc39ea32daa39af8de522205f512f458923e677/colorlog-6.9.0.tar.gz", hash = "sha256:bfba54a1b93b94f54e1f4fe48395725a3d92fd2a4af702f6bd70946bdc0c6ac2", size = 16624, upload-time = "2024-10-29T18:34:51.011Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/51/9b208e85196941db2f0654ad0357ca6388ab3ed67efdbfc799f35d1f83aa/colorlog-6.9.0-py3-none-any.whl", hash = "sha256:5906e71acd67cb07a71e779c47c4bcb45fb8c2993eebe9e5adcd6a6f1b283eff", size = 11424, upload-time = "2024-10-29T18:34:49.815Z" },
+]
+
+[[package]]
 name = "dill"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -397,6 +409,8 @@ dependencies = [
     { name = "load-dotenv" },
     { name = "onnxruntime" },
     { name = "opencv-python" },
+    { name = "rapid-latex-ocr" },
+    { name = "rapidocr" },
     { name = "sentence-transformers" },
 ]
 
@@ -412,6 +426,8 @@ requires-dist = [
     { name = "load-dotenv", specifier = ">=0.1.0" },
     { name = "onnxruntime", specifier = ">=1.23.0" },
     { name = "opencv-python", specifier = ">=4.12.0.88" },
+    { name = "rapid-latex-ocr", specifier = ">=0.0.6" },
+    { name = "rapidocr", specifier = ">=3.4.1" },
     { name = "sentence-transformers", specifier = ">=5.1.1" },
 ]
 
@@ -2081,6 +2097,43 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/79/8b/76c7d325e11d97cb8eb5e261c3759e9ed6664735afbf32fdded5b580690c/qdrant_client-1.15.1.tar.gz", hash = "sha256:631f1f3caebfad0fd0c1fba98f41be81d9962b7bf3ca653bed3b727c0e0cbe0e", size = 295297, upload-time = "2025-07-31T19:35:19.627Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ef/33/d8df6a2b214ffbe4138db9a1efe3248f67dc3c671f82308bea1582ecbbb7/qdrant_client-1.15.1-py3-none-any.whl", hash = "sha256:2b975099b378382f6ca1cfb43f0d59e541be6e16a5892f282a4b8de7eff5cb63", size = 337331, upload-time = "2025-07-31T19:35:17.539Z" },
+]
+
+[[package]]
+name = "rapid-latex-ocr"
+version = "0.0.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "onnxruntime" },
+    { name = "opencv-python" },
+    { name = "pillow" },
+    { name = "pyyaml" },
+    { name = "tokenizers" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/90/b2f31527a5218a22e35c5ff615882ef9eba3cafa78d0e8645accd6a6549a/rapid_latex_ocr-0.0.6-py3-none-any.whl", hash = "sha256:7577604ead200183f4f6f2888c7061cab9ad19fa46f2f644be91808c5a954483", size = 11424, upload-time = "2023-12-10T12:38:07.226Z" },
+]
+
+[[package]]
+name = "rapidocr"
+version = "3.4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorlog" },
+    { name = "numpy" },
+    { name = "omegaconf" },
+    { name = "opencv-python" },
+    { name = "pillow" },
+    { name = "pyclipper" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "shapely" },
+    { name = "six" },
+    { name = "tqdm" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f3/58/2320ca60d9fac735b68fedb3500f5705520fccf0a759ddaf59cd0e7e67d3/rapidocr-3.4.1-py3-none-any.whl", hash = "sha256:3e1e6b339a953282c9b3892c546ea7defa4e471df5e38295d8682bc79c7d5fc9", size = 15055933, upload-time = "2025-09-18T22:43:38.189Z" },
 ]
 
 [[package]]
