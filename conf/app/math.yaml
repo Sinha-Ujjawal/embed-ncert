@@ -12,7 +12,7 @@ docling_config:
     # prompt: "OCR this image"
     # vlm_config:
     #   _target_: app_config.docling_config.ocr_config.ApiVlmConfig
-    #   url: "http://localhost:11434/v1/chat/completions"
+    #   url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
     #   params:
     #     model: openbmb/minicpm-v4.5
     #     temperature: 0
@@ -20,7 +20,7 @@ docling_config:
 
   formula_analyser:
     # _target_: app_config.docling_config.formula_understanding_pipeline.FormulaUnderstandingAnalyserOpenAIApi
-    # url: "http://localhost:11434/v1/chat/completions"
+    # url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
     # prompt: "Extract formula from this image. If no text in image, then output nothing. Don't add any explanation or description, just output the content of the image."
     # params:
     #   # model: granite3.2-vision:2b
