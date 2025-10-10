@@ -3,7 +3,7 @@ _target_: app_config.AppConfig
 docling_config:
   _target_: app_config.docling_config.DoclingConfig
   ocr_config:
-    _target_: app_config.docling_config.ocr_config.StandardOCRConfig
+    _target_: app_config.docling_config.ocr_config.ThreadedStandardOCRConfig
     languages: ["eng"]
     force_full_page_ocr: true
     ocr_engine: tesseract_cli_ocr

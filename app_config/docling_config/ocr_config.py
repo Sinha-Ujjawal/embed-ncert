@@ -14,6 +14,7 @@ from docling.datamodel.pipeline_options import (
     RapidOcrOptions,
     TesseractCliOcrOptions,
     TesseractOcrOptions,
+    ThreadedPdfPipelineOptions,
     VlmPipelineOptions,
 )
 from docling.datamodel.pipeline_options_vlm_model import (
@@ -23,6 +24,7 @@ from docling.datamodel.pipeline_options_vlm_model import (
     ResponseFormat,
 )
 from docling.pipeline.standard_pdf_pipeline import StandardPdfPipeline
+from docling.pipeline.threaded_standard_pdf_pipeline import ThreadedStandardPdfPipeline
 from docling.pipeline.vlm_pipeline import VlmPipeline
 from load_dotenv import load_dotenv
 
@@ -168,8 +170,7 @@ class StandardOCRConfig(OCRConfig):
             **self.ocr_engine_conf,
         )
 
-    def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, PdfPipelineOptions]:
-        options = PdfPipelineOptions()
+    def populate_options(self, options: PdfPipelineOptions) -> None:
         options.layout_options = self.layout_model_config.docling_layout_options()
         options.artifacts_path = DOCLING_ARTIFACTS_PATH
         options.do_ocr = True
@@ -178,4 +179,36 @@ class StandardOCRConfig(OCRConfig):
         options.do_formula_enrichment = self.do_formula_enrichment
         options.do_table_structure = self.do_table_structure
         options.do_code_enrichment = self.do_code_enrichment
+
+    def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, PdfPipelineOptions]:
+        options = PdfPipelineOptions()
+        self.populate_options(options)
         return StandardPdfPipeline, options
+
+
+@dataclass(slots=True)
+class ThreadedStandardOCRConfig(StandardOCRConfig):
+    # Batch sizes for different stages
+    ocr_batch_size: int = 4
+    layout_batch_size: int = 4
+    table_batch_size: int = 4
+
+    # Timing control
+    batch_timeout_seconds: float = 2.0
+
+    # Backpressure and queue control
+    queue_max_size: int = 100
+
+    def populate_options(self, options: PdfPipelineOptions) -> None:
+        assert isinstance(options, ThreadedPdfPipelineOptions)
+        StandardOCRConfig.populate_options(self, options)
+        options.ocr_batch_size = self.ocr_batch_size
+        options.layout_batch_size = self.layout_batch_size
+        options.table_batch_size = self.table_batch_size
+        options.batch_timeout_seconds = self.batch_timeout_seconds
+        options.queue_max_size = self.queue_max_size
+
+    def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, ThreadedPdfPipelineOptions]:
+        options = ThreadedPdfPipelineOptions()
+        self.populate_options(options)
+        return ThreadedStandardPdfPipeline, options
