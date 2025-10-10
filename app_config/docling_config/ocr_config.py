@@ -85,10 +85,14 @@ class VlmOCRConfig(OCRConfig):
     scale: float = 2.0
     max_size: int | None = None
     temperature: float = 0.0
+    generate_page_images: bool = True
+    force_backend_text: bool = False
 
     def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, VlmPipelineOptions]:
         options = VlmPipelineOptions()
         options.artifacts_path = DOCLING_ARTIFACTS_PATH
+        options.generate_page_images = self.generate_page_images
+        options.force_backend_text = self.force_backend_text
         options.vlm_options = self.vlm_config.vlm_options(
             prompt=self.prompt,
             scale=self.scale,

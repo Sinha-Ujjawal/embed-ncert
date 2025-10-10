@@ -18,6 +18,7 @@ from docling.document_converter import DocumentConverter, PdfFormatOption
 class DoclingConfig:
     ocr_config: OCRConfig
     generate_page_images: bool = True
+    generate_picture_images: bool = False
     images_scale: float = 1.0
     do_picture_classification: bool = True
     # Enrichments
@@ -27,6 +28,7 @@ class DoclingConfig:
     def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, PaginatedPipelineOptions]:
         cls, options = self.ocr_config.docling_paginated_pipeline_cls_and_options()
         options.generate_page_images = self.generate_page_images
+        options.generate_picture_images = self.generate_picture_images
         options.images_scale = self.images_scale
         options.do_picture_classification = self.do_picture_classification
         if self.picture_desc_config:
