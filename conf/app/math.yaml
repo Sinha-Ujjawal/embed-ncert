@@ -1,39 +1,25 @@
 docling_config:
   ocr_config:
     _target_: app_config.docling_config.ocr_config.ThreadedStandardOCRConfig
-    # languages: ["eng", "equ"]
-    languages: ["english"]
+    languages: ["eng", "equ"]
     force_full_page_ocr: true
-    # ocr_engine: tesseract_cli_ocr
-    ocr_engine: rapid_ocr
+    ocr_engine: tesseract_cli_ocr
     do_formula_enrichment: true
     do_table_structure: true
-    # _target_: app_config.docling_config.ocr_config.VlmOCRConfig
-    # prompt: "OCR this image"
-    # vlm_config:
-    #   _target_: app_config.docling_config.ocr_config.ApiVlmConfig
-    #   url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
-    #   params:
-    #     model: openbmb/minicpm-v4.5
-    #     temperature: 0
-    #   timeout: 1800
 
   formula_analyser:
-    # _target_: app_config.docling_config.formula_understanding_pipeline.FormulaUnderstandingAnalyserOpenAIApi
-    # url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
-    # prompt: "Extract formula from this image. If no text in image, then output nothing. Don't add any explanation or description, just output the content of the image."
-    # params:
-    #   # model: granite3.2-vision:2b
-    #   # model: gemma3:4b
-    #   # model: gemma3:12b
-    #   # model: openbmb/minicpm-v4.5
-    #   # model: openbmb/minicpm-o2.6
-    #   # model: qwen2.5vl:7b
-    #   model: qwen2.5vl:3b
-    #   temperature: 0
-    # concurrency: 1
-    # timeout: 1800  # 30 minutes
     _target_: app_config.docling_config.formula_understanding_pipeline.FormulaUnderstandingAnalyserRapidLatexOCRCli
+    timeout: 1800  # 30 minutes
+
+  text_analyser:
+    _target_: app_config.docling_config.text_enhancer_pipeline.TextEnhancerAnalyserOpenAIApi
+    allow_label_expr: "label != 'formula'"
+    url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
+    prompt: "Extract text from this image. If no text in image, then output nothing. Don't add any explanation or description, just output the content of the image."
+    params:
+      model: qwen2.5vl:3b
+      temperature: 0
+    concurrency: 1
     timeout: 1800  # 30 minutes
 
 vector_store_config:

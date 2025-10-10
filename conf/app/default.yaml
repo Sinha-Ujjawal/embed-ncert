@@ -17,26 +17,17 @@ docling_config:
 
   # Enrichments
   picture_desc_config:
-    # _target_: app_config.docling_config.picture_desc_config.PictureDescriptionVlmConfig
-    # repo_id: "ibm-granite/granite-docling-258M"
-    # prompt: "Describe this image in a few sentences."
-    # generation_config:
-    #   min_tokens: 100
-    #   max_new_tokens: 200
-    #   do_sample: false
     _target_: app_config.docling_config.picture_desc_config.PictureDescriptionApiConfig
     url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
     prompt: "Describe this image in detail. Don't miss out any details."
     params:
-      model: granite3.2-vision:2b
-      # model: gemma3:4b
-      # model: gemma3:12b
-      # model: openbmb/minicpm-v4.5
-      # model: openbmb/minicpm-o2.6
+      # model: qwen2.5vl:7b
+      model: qwen2.5vl:3b
       temperature: 0
     timeout: 1800
 
   formula_analyser: null
+  text_analyser: null
 
 tokenizer_config:
   _target_: app_config.tokenizer_config.HuggingfaceTokenizerConfig

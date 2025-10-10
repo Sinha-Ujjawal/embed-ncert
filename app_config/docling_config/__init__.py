@@ -9,6 +9,10 @@ from app_config.docling_config.picture_desc_config import (
     PictureDescriptionApiOptions,
     PictureDescriptionConfig,
 )
+from app_config.docling_config.text_enhancer_pipeline import (
+    TextEnhancerAnalyser,
+    text_enhancer_analyser_pipeline_cls,
+)
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PaginatedPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
@@ -24,6 +28,7 @@ class DoclingConfig:
     # Enrichments
     picture_desc_config: PictureDescriptionConfig | None = None
     formula_analyser: FormulaUnderstandingAnalyser | None = None
+    text_analyser: TextEnhancerAnalyser | None = None
 
     def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, PaginatedPipelineOptions]:
         cls, options = self.ocr_config.docling_paginated_pipeline_cls_and_options()
@@ -41,6 +46,8 @@ class DoclingConfig:
                 options.enable_remote_services = True
         if self.formula_analyser:
             cls = formula_understanding_analyser_pipeline_cls(cls, self.formula_analyser)
+        if self.text_analyser:
+            cls = text_enhancer_analyser_pipeline_cls(cls, self.text_analyser)
         return cls, options
 
     def docling_pdf_converter(self) -> DocumentConverter:
