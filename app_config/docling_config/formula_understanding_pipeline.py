@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import logging
+import re
 import subprocess
 from abc import abstractmethod
 from collections.abc import Iterable
@@ -19,6 +20,127 @@ from docling_core.types.doc import DocItemLabel, DoclingDocument, NodeItem, Text
 from PIL.Image import Image
 
 logger = logging.getLogger(__name__)
+
+
+def deduplicate_latex(latex_string, debug=False):
+    """
+    Deduplicate formulas in LaTeX arrays by removing duplicate cells.
+
+    Args:
+        latex_string (str): Input LaTeX string
+        debug (bool): Print debug information
+
+    Returns:
+        str: Deduplicated LaTeX string
+    """
+    return deduplicate_latex_regex(latex_string, debug)
+
+
+def normalize_cell(cell):
+    """Normalize cell content for comparison by removing extra braces."""
+    normalized = cell.strip()
+
+    # Remove all outer brace pairs iteratively
+    changed = True
+    iterations = 0
+    max_iterations = 10  # Safety limit
+
+    while changed and iterations < max_iterations:
+        iterations += 1
+        changed = False
+
+        # Try to remove double braces {{...}}
+        if normalized.startswith('{{') and normalized.endswith('}}'):
+            # Check if they match
+            test = normalized[2:-2]
+            if test:  # Don't reduce to empty string
+                normalized = test
+                changed = True
+                continue
+
+        # Try to remove single braces {...}
+        if normalized.startswith('{') and normalized.endswith('}'):
+            # Count braces to see if outer ones match
+            inner = normalized[1:-1]
+            if inner:  # Don't reduce to empty string
+                depth = 0
+                valid = True
+                for char in inner:
+                    if char == '{':
+                        depth += 1
+                    elif char == '}':
+                        depth -= 1
+                    if depth < 0:
+                        valid = False
+                        break
+
+                if valid and depth == 0:
+                    normalized = inner
+                    changed = True
+
+    return normalized.strip()
+
+
+def deduplicate_latex_regex(latex_string, debug=False):
+    """Regex-based deduplication for arrays."""
+
+    def process_array(match):
+        header = match.group(1)  # e.g., {l l}
+        content = match.group(2)
+
+        if debug:
+            logger.debug('\nProcessing array with regex')
+            logger.debug(f'Header: {header}')
+            logger.debug(f'Content: {repr(content)}')
+
+        rows = re.split(r'\\\\', content)
+        seen_cells = set()
+        new_rows = []
+
+        for row_num, row in enumerate(rows):
+            row = row.strip()
+            if not row:
+                continue
+
+            cells = row.split('&')
+            new_cells = []
+
+            if debug:
+                logger.debug(f'\nRow {row_num}: {len(cells)} cells')
+
+            for cell in cells:
+                cell_cleaned = cell.strip()
+                if not cell_cleaned:
+                    continue
+
+                cell_normalized = normalize_cell(cell_cleaned)
+
+                if debug:
+                    logger.debug(f'  Cell: {repr(cell_cleaned)}')
+                    logger.debug(f'  Normalized: {repr(cell_normalized)}')
+                    logger.debug(f'  In seen? {cell_normalized in seen_cells}')
+
+                if cell_normalized not in seen_cells:
+                    seen_cells.add(cell_normalized)
+                    new_cells.append(cell_cleaned)
+                elif debug:
+                    logger.debug('    -> REMOVED (duplicate)')
+
+            if new_cells:
+                new_rows.append('&'.join(new_cells))
+
+        result = r'\begin{array}' + header + '\\\\'.join(new_rows) + r'\end{array}'
+
+        if debug:
+            logger.debug(f'\nResult: {result}')
+
+        return result
+
+    # Match array environments
+    pattern = r'\\begin\{array\}(\{[^}]+\})(.*?)\\end\{array\}'
+    result = re.sub(pattern, process_array, latex_string, flags=re.DOTALL)
+
+    return result
 
 
 @dataclass(slots=True)
@@ -241,8 +363,16 @@ class FormulaUnderstandingAnalyserRapidLatexOCRCli(FormulaUnderstandingAnalyserC
         return cmd
 
     def format_output(self, output: str) -> str:
-        *lines, _cost = output.splitlines()
-        return '\n'.join(lines)
+        lines = output.splitlines()
+        if len(lines) < 2:
+            return output
+        lines.pop(-1)  # remove last line as it has `cost: <cost>`
+        latex = '\n'.join(lines)
+        try:
+            return deduplicate_latex(latex)
+        except Exception as e:
+            logger.error(f'Got error when trying to deduplicate latex: {latex}: {e}')
+            return '\n'.join(lines)
 
 
 class FormulaUnderstandingAnalyserEnrichmentModel(BaseItemAndImageEnrichmentModel):

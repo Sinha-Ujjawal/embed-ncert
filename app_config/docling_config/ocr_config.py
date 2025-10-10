@@ -4,8 +4,10 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
+from docling.datamodel.pipeline_options import AcceleratorDevice, EasyOcrOptions
+from docling.datamodel.pipeline_options import LayoutModelConfig as DoclingLayoutModelConfig
 from docling.datamodel.pipeline_options import (
-    EasyOcrOptions,
+    LayoutOptions,
     OcrOptions,
     PaginatedPipelineOptions,
     PdfPipelineOptions,
@@ -91,6 +93,7 @@ class VlmOCRConfig(OCRConfig):
             max_size=self.max_size,
             temperature=self.temperature,
         )
+
         return VlmPipeline, options
 
 
@@ -99,6 +102,41 @@ class StandardOcrEngine(StrEnum):
     RAPID_OCR = 'rapid_ocr'
     TESSERACT_OCR = 'tesseract_ocr'
     TESSERACT_CLI_OCR = 'tesseract_cli_ocr'
+
+
+@dataclass(slots=True)
+class LayoutModelConfig:
+    # model_spec params:
+    name: str = 'docling_layout_heron'
+    repo_id: str = 'ds4sd/docling-layout-heron'
+    revision: str = 'main'
+    model_path: str = ''
+    supported_devices: list[AcceleratorDevice] = field(
+        default_factory=lambda: [
+            AcceleratorDevice.CPU,
+            AcceleratorDevice.CUDA,
+            AcceleratorDevice.MPS,
+        ]
+    )
+    # layout_options params:
+    create_orphan_clusters: bool = True  # Whether to create clusters for orphaned cells
+    keep_empty_clusters: bool = False  # Whether to keep clusters that contain no text cells
+    skip_cell_assignment: bool = False  # Skip cell-to-cluster assignment for VLM-only processing
+
+    def docling_layout_options(self) -> LayoutOptions:
+        model_spec = DoclingLayoutModelConfig(
+            name=self.name,
+            repo_id=self.repo_id,
+            revision=self.revision,
+            model_path=self.model_path,
+            supported_devices=self.supported_devices,
+        )
+        return LayoutOptions(
+            create_orphan_clusters=self.create_orphan_clusters,
+            keep_empty_clusters=self.keep_empty_clusters,
+            model_spec=model_spec,
+            skip_cell_assignment=self.skip_cell_assignment,
+        )
 
 
 @dataclass(slots=True)
@@ -111,6 +149,7 @@ class StandardOCRConfig(OCRConfig):
     do_formula_enrichment: bool = False  # perform formula OCR, return Latex code
     do_table_structure: bool = False
     do_code_enrichment: bool = False
+    layout_model_config: LayoutModelConfig = field(default_factory=lambda: LayoutModelConfig())
 
     def docling_ocr_options(self) -> OcrOptions:
         if self.ocr_engine == StandardOcrEngine.EASY_OCR:
@@ -131,6 +170,7 @@ class StandardOCRConfig(OCRConfig):
 
     def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, PdfPipelineOptions]:
         options = PdfPipelineOptions()
+        options.layout_options = self.layout_model_config.docling_layout_options()
         options.artifacts_path = DOCLING_ARTIFACTS_PATH
         options.do_ocr = True
         options.ocr_options = self.docling_ocr_options()
