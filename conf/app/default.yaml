@@ -20,10 +20,9 @@ docling_config:
   picture_desc_config:
     _target_: app_config.docling_config.picture_desc_config.PictureDescriptionApiConfig
     url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
-    prompt: "Describe this image in detail. Don't miss out any details."
+    prompt: "${read_file:assets/prompts/${oc.env:CUSTOM_PICTURE_DESC_MODEL,qwen2.5vl:7b}/picture_desc_prompt.txt}"
     params:
-      # model: qwen2.5vl:7b
-      model: qwen2.5vl:3b
+      model: "${oc.env:CUSTOM_PICTURE_DESC_MODEL,qwen2.5vl:7b}"
       temperature: 0
     timeout: 1800
 
@@ -32,9 +31,9 @@ docling_config:
     _target_: app_config.docling_config.text_enhancer_pipeline.TextEnhancerAnalyserOpenAIApi
     allow_label_expr: "label != 'formula'"
     url: "${oc.env:OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
-    prompt: "Extract text from this image. If no text in image, then output nothing. Don't add any explanation or description, just output the content of the image."
+    prompt: "${read_file:assets/prompts/${oc.env:CUSTOM_TEXT_ANALYSER_MODEL,qwen2.5vl:7b}/text_analyser_prompt.txt}"
     params:
-      model: qwen2.5vl:3b
+      model: "${oc.env:CUSTOM_TEXT_ANALYSER_MODEL,qwen2.5vl:3b}"
       temperature: 0
     concurrency: 1
     timeout: 1800  # 30 minutes

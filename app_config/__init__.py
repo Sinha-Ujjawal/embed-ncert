@@ -10,9 +10,17 @@ from app_config.embedding_config import EmbeddingConfig
 from app_config.tokenizer_config import TokenizerConfig
 from app_config.vector_store_config import VectorStoreConfig
 
-DEFAULT_CONFIG = Path(__file__).parent.parent / 'conf/app/default.yaml'
+PROJECT_ROOT_PATH = Path(__file__).parent.parent
+DEFAULT_CONFIG = PROJECT_ROOT_PATH / 'conf/app/default.yaml'
 
 load_dotenv()
+
+
+def read_file_resolver(path: str) -> str:
+    return (PROJECT_ROOT_PATH / path).read_text()
+
+
+OmegaConf.register_new_resolver('read_file', read_file_resolver)
 
 
 @dataclass
