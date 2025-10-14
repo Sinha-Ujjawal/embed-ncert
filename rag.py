@@ -92,8 +92,6 @@ def main() -> None:
             f'Chunk ID: {doc.metadata.get("chunk_id")}\nContent: {doc.page_content}'
             for doc in state['context']
         )
-        print(context_with_ids)
-        return {'answer': None}
         response = llm_chain.invoke({'question': state['question'], 'context': context_with_ids})
         return {'answer': response}
 
@@ -107,8 +105,8 @@ def main() -> None:
     )
     graph = builder.compile()
     result = graph.invoke({'question': args.question})  # type: ignore
-    # print(f'Context: {result["context"]}\n\n')
-    # print(f'Answer: {result["answer"]}')
+    print(f'Context: {result["context"]}\n\n')
+    print(f'Answer: {result["answer"]}')
 
 
 if __name__ == '__main__':
