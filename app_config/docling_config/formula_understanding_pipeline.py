@@ -185,7 +185,8 @@ class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
                 tasks.append(_submit(idx, el))
             for task in asyncio.as_completed(tasks):
                 idx, formula_text = await task
-                res[idx].text = formula_text
+                if formula_text:
+                    res[idx].text = formula_text
 
             return res
 

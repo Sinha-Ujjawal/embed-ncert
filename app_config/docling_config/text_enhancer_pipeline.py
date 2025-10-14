@@ -63,7 +63,8 @@ class TextEnhancerAnalyserAsync(TextEnhancerAnalyser):
                 tasks.append(_submit(idx, el))
             for task in asyncio.as_completed(tasks):
                 idx, text = await task
-                res[idx].text = text
+                if text:
+                    res[idx].text = text
 
             return res
 
