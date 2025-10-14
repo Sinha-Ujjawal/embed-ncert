@@ -53,5 +53,7 @@ embedding_config:
 
 vector_store_config:
   _target_: app_config.vector_store_config.QdrantVectorStoreConfig
-  url: http://localhost:6333
+  client_config:
+    _target_: app_config.vector_store_config.QdrantURLClientConfig
+    url: http://localhost:6333
   collection_name: default
