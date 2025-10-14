@@ -18,14 +18,16 @@ class ResponseFormat(BaseModel):
     """Always use this tool to structure your response to the user."""
 
     thinking: str = Field(
-        description='Your internal reasoning and thought process before arriving at the answer'
+        description='Your internal reasoning and thought process before arriving at the answer. Explicitly mention which chunk IDs you are considering and using.'
     )
     dont_know: bool = Field(
         description='Set this to True if you dont know the answer to the question'
     )
-    answer: str = Field(description='Your answer to the question')
+    answer: str = Field(
+        description='Form the answer to the question using ONLY the context provided. Only use chunks that are directly relevant to answering the question.'
+    )
     chunk_ids: list[str] = Field(
-        description='List of chunk IDs from the context that were used to answer the question'
+        description='CRITICAL: List the exact chunk IDs (e.g., "chunk_123", "chunk_456") from the context that you actually used to formulate your answer. Only include chunk IDs whose content directly contributed to your response. Sort by relevance to the question (most relevant first).'
     )
 
 
@@ -36,11 +38,18 @@ RAG_PROMPT_TEMPLATE = PromptTemplate(
     You are an assistant for question-answering tasks.
     Use the following pieces of retrieved context to answer the question.
 
-    If you don't know the answer, just say "I don't know" or "I'm not sure".
-    Use three sentences maximum and keep the answer concise.
+    IMPORTANT INSTRUCTIONS:
+    1. Read through ALL the provided context chunks carefully
+    2. Each chunk has a unique "Chunk ID" (e.g., chunk_001, chunk_002, etc.)
+    3. Only use information from chunks that are directly relevant to answering the question
+    4. In your thinking, explicitly state which chunk IDs you are considering and which ones you decide to use
+    5. In your final chunk_ids list, include ONLY the exact chunk IDs that contributed to your answer
+    6. If you don't know the answer based on the provided context, set dont_know to True
 
     Question: {question}
-    Context: {context}
+
+    Context (with Chunk IDs):
+    {context}
 
     {format_instruction}
     """),
@@ -75,6 +84,7 @@ def main() -> None:
         model=os.environ.get('RAG_LLM_MODEL', 'qwen3:4b'),
         reasoning=os.environ.get('RAG_LLM_THINKING', '0') == '1',
         base_url=os.environ.get('RAG_OLLMA_HOST'),
+        temperature=0.0,
     )
     llm_chain = RAG_PROMPT_TEMPLATE | llm | response_format_parser
 

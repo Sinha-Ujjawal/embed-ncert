@@ -40,13 +40,16 @@ docling_config:
 
 tokenizer_config:
   _target_: app_config.tokenizer_config.HuggingfaceTokenizerConfig
-  model: "onnx-community/embeddinggemma-300m-ONNX"
+  # model: "onnx-community/embeddinggemma-300m-ONNX"
+  model: "Qwen/Qwen3-Embedding-4B"
   max_tokens: 1024
 
 embedding_config:
-  _target_: app_config.embedding_config.OllamaEmbeddingConfig
-  model: "embeddinggemma:300m"
-  base_url: "${oc.env:EMBEDDING_OLLAMA_HOST,http://localhost:11434/}"
+  # _target_: app_config.embedding_config.OllamaEmbeddingConfig
+  # model: "embeddinggemma:300m"
+  # base_url: "${oc.env:EMBEDDING_OLLAMA_HOST,http://localhost:11434/}"
+  _target_: app_config.embedding_config.HuggingFaceEmbeddingsConfig
+  model_name: "Qwen/Qwen3-Embedding-4B-GGUF"
 
 vector_store_config:
   _target_: app_config.vector_store_config.QdrantVectorStoreConfig
