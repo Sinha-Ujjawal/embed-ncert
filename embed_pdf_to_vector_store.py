@@ -7,6 +7,7 @@ from docling.chunking import HybridChunker
 from langchain_core.documents import Document
 from langchain_docling.loader import MetaExtractor
 from load_dotenv import load_dotenv
+from tqdm.auto import tqdm
 
 from app_config import AppConfig
 
@@ -45,21 +46,27 @@ def main() -> None:
     else:
         chunker = HybridChunker()
     meta_extractor = MetaExtractor()
-    for file_path in file_paths:
+    vector_store = app_config.vector_store_config.get_vectorstore(embeddings)
+    for file_path in tqdm(file_paths):
         print(f'Embedding file: {file_path}')
         document = converter.convert(file_path).document
-        chunks = (
-            Document(
-                page_content=chunker.contextualize(chunk=chunk),
-                metadata=meta_extractor.extract_chunk_meta(
-                    file_path=file_path,
-                    chunk=chunk,
-                ),
-                id=make_doc_id(f'{file_path}-chunk-{chunk_id}'),
+        chunks = []
+        for chunk_id, chunk in tqdm(enumerate(chunker.chunk(document), 1)):
+            chunk_id = make_doc_id(f'{file_path}-chunk-{chunk_id}')
+            chunks.append(
+                Document(
+                    page_content=chunker.contextualize(chunk=chunk),
+                    metadata={
+                        **meta_extractor.extract_chunk_meta(
+                            file_path=file_path,
+                            chunk=chunk,
+                        ),
+                        'chunk_id': chunk_id,
+                    },
+                    id=chunk_id,
+                )
             )
-            for chunk_id, chunk in enumerate(chunker.chunk(document), 1)
-        )
-        _ = app_config.vector_store_config.from_documents(chunks, embeddings)
+        vector_store.add_documents(chunks)
 
 
 if __name__ == '__main__':
