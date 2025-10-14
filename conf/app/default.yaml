@@ -49,7 +49,7 @@ embedding_config:
   # model: "embeddinggemma:300m"
   # base_url: "${oc.env:EMBEDDING_OLLAMA_HOST,http://localhost:11434/}"
   _target_: app_config.embedding_config.HuggingFaceEmbeddingsConfig
-  model_name: "Qwen/Qwen3-Embedding-4B-GGUF"
+  model_name: "Qwen/Qwen3-Embedding-4B"
 
 vector_store_config:
   _target_: app_config.vector_store_config.QdrantVectorStoreConfig
