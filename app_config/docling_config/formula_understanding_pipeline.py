@@ -1,23 +1,23 @@
 import asyncio
-import base64
 import logging
 import re
 import subprocess
 from abc import abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
 
-import aiohttp
 from docling.datamodel.base_models import ItemAndImageEnrichmentElement
 from docling.datamodel.pipeline_options import PaginatedPipelineOptions
 from docling.models.base_model import BaseItemAndImageEnrichmentModel
 from docling.pipeline.standard_pdf_pipeline import PaginatedPipeline
 from docling_core.types.doc import DocItemLabel, DoclingDocument, NodeItem, TextItem
 from PIL.Image import Image
+from pydantic.networks import AnyUrl
+from utils.api_image_request import api_image_request
+from utils.retry import RetryConfig, retry_async
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +155,7 @@ class FormulaUnderstandingAnalyser:
 @dataclass(slots=True)
 class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
     concurrency: int = 1
+    retry_config: RetryConfig | None = None
 
     @abstractmethod
     async def extract_formula_from_img(self, image: Image) -> str:
@@ -169,13 +170,18 @@ class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
+        # Patch extract_formula_from_img with retry if config is defined
+        extract_func = self.extract_formula_from_img
+        if self.retry_config is not None:
+            extract_func = retry_async(self.retry_config, logger=logger)(extract_func)
+
         async def _submit_and_wait() -> list[NodeItem]:
             sem = asyncio.Semaphore(self.concurrency)
 
             async def _submit(idx: int, el: ItemAndImageEnrichmentElement):
                 assert isinstance(el.item, TextItem)
                 async with sem:
-                    formula_text = await self.extract_formula_from_img(el.image)
+                    formula_text = await extract_func(el.image)
                 return idx, formula_text
 
             res = []
@@ -197,65 +203,23 @@ class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
 class FormulaUnderstandingAnalyserOpenAIApi(FormulaUnderstandingAnalyserAsync):
     """Configuration for OpenAI-compatible API client."""
 
-    url: str = 'http://localhost:8000/v1/chat/completions'
+    url: AnyUrl = AnyUrl('http://localhost:8000/v1/chat/completions')
     headers: dict[str, str] = field(default_factory=lambda: {})
     params: dict[str, Any] = field(default_factory=lambda: {})
     timeout: float = 60 * 1  # 1 minute
     prompt: str = "Extract the LaTeX code from this image. Output only the LaTeX formula, nothing else. If no mathematical formula is found, output nothing. If more than one formula, then output all seperated by new lines. Don't miss any detail please."
 
-    def encode_image_to_base64(self, image: Image) -> str:
-        """Convert PIL Image to base64 string."""
-        buffered = BytesIO()
-        image.save(buffered, format='PNG')
-        img_bytes = buffered.getvalue()
-        return base64.b64encode(img_bytes).decode('utf-8')
-
     async def extract_formula_from_img(self, image: Image) -> str:
         """Send image to OpenAI-compatible API and extract formula."""
-        try:
-            # Convert image to base64
-            base64_image = self.encode_image_to_base64(image)
-
-            # Prepare the request payload
-            payload = {
-                'messages': [
-                    {
-                        'role': 'user',
-                        'content': [
-                            {'type': 'text', 'text': self.prompt},
-                            {
-                                'type': 'image_url',
-                                'image_url': {'url': f'data:image/png;base64,{base64_image}'},
-                            },
-                        ],
-                    }
-                ],
-                **self.params,  # Add any additional params like model, max_tokens, etc.
-            }
-
-            # Make the async HTTP request
-            timeout = aiohttp.ClientTimeout(total=self.timeout)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                logger.info(f'POST request to url: {self.url}')
-                async with session.post(self.url, json=payload, headers=self.headers) as response:
-                    response.raise_for_status()
-                    result = await response.json()
-
-                    # Extract the content from the response
-                    if 'choices' in result and len(result['choices']) > 0:
-                        content = result['choices'][0]['message']['content']
-                        logger.info(f'Formula extraction successful: {content}...')
-                        return content
-                    else:
-                        logger.error(f'Unexpected response format: {result}')
-                        return 'Error: Unexpected response format'
-
-        except aiohttp.ClientError as e:
-            logger.error(f'HTTP error calling API: {e}')
-            return ''
-        except Exception as e:
-            logger.error(f'Error calling API: {e}')
-            return ''
+        return api_image_request(
+            image=image,
+            prompt=self.prompt,
+            url=self.url,
+            timeout=self.timeout,
+            header=self.headers,
+            logger=logger,
+            **self.params,
+        )
 
 
 @dataclass(slots=True)

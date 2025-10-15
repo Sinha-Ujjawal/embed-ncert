@@ -17,14 +17,20 @@ docling_config:
   images_scale: 1.0
 
   # Enrichments
-  picture_desc_config:
-    _target_: app_config.docling_config.picture_desc_config.PictureDescriptionApiConfig
+  picture_desc_analyser:
+    _target_: app_config.docling_config.picture_desc_pipeline.PictureDescriptionAnalyserOpenAIApi
     url: "${oc.env:PICTURE_DESC_OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
     prompt: "${read_file:assets/prompts/${oc.env:CUSTOM_PICTURE_DESC_MODEL,qwen2.5vl:7b}/picture_desc_prompt.txt}"
     params:
       model: "${oc.env:CUSTOM_PICTURE_DESC_MODEL,qwen2.5vl:7b}"
       temperature: 0
     timeout: 1800
+    retry_config:
+      _target_: utils.retry.RetryConfig
+      max_retries: 3
+      base_delay: 10
+      strategy: "exponential"
+      jitter: true
 
   formula_analyser: null
   text_analyser:
@@ -37,6 +43,12 @@ docling_config:
       temperature: 0
     concurrency: 1
     timeout: 1800  # 30 minutes
+    retry_config:
+      _target_: utils.retry.RetryConfig
+      max_retries: 3
+      base_delay: 10
+      strategy: "exponential"
+      jitter: true
 
 tokenizer_config:
   _target_: app_config.tokenizer_config.HuggingfaceTokenizerConfig

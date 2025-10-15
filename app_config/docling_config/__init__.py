@@ -5,9 +5,9 @@ from app_config.docling_config.formula_understanding_pipeline import (
     formula_understanding_analyser_pipeline_cls,
 )
 from app_config.docling_config.ocr_config import OCRConfig
-from app_config.docling_config.picture_desc_config import (
-    PictureDescriptionApiOptions,
-    PictureDescriptionConfig,
+from app_config.docling_config.picture_desc_pipeline import (
+    PictureDescAnalyser,
+    picture_desc_analyser_pipeline_cls,
 )
 from app_config.docling_config.text_enhancer_pipeline import (
     TextEnhancerAnalyser,
@@ -26,7 +26,7 @@ class DoclingConfig:
     images_scale: float = 1.0
     do_picture_classification: bool = True
     # Enrichments
-    picture_desc_config: PictureDescriptionConfig | None = None
+    picture_desc_analyser: PictureDescAnalyser | None = None
     formula_analyser: FormulaUnderstandingAnalyser | None = None
     text_analyser: TextEnhancerAnalyser | None = None
 
@@ -36,14 +36,8 @@ class DoclingConfig:
         options.generate_picture_images = self.generate_picture_images
         options.images_scale = self.images_scale
         options.do_picture_classification = self.do_picture_classification
-        if self.picture_desc_config:
-            options.do_picture_description = True
-            options.do_picture_classification = True
-            options.picture_description_options = (
-                self.picture_desc_config.docling_picture_description_options()
-            )
-            if isinstance(options.picture_description_options, PictureDescriptionApiOptions):
-                options.enable_remote_services = True
+        if self.picture_desc_analyser:
+            cls = picture_desc_analyser_pipeline_cls(cls, self.picture_desc_analyser)
         if self.formula_analyser:
             cls = formula_understanding_analyser_pipeline_cls(cls, self.formula_analyser)
         if self.text_analyser:
