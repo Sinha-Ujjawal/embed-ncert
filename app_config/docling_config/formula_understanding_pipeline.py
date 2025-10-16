@@ -217,7 +217,6 @@ class FormulaUnderstandingAnalyserOpenAIApi(FormulaUnderstandingAnalyserAsync):
             url=self.url,
             timeout=self.timeout,
             header=self.headers,
-            logger=logger,
             **self.params,
         )
 

@@ -78,7 +78,6 @@ class PictureDescriptionAnalyserOpenAIApi(PictureDescAnalyser):
                         url=model.options.url,
                         timeout=model.options.timeout,
                         headers=model.options.headers,
-                        logger=logger,
                         **model.options.params,
                     )
 

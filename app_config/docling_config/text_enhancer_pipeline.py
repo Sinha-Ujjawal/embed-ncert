@@ -95,7 +95,6 @@ class TextEnhancerAnalyserOpenAIApi(TextEnhancerAnalyserAsync):
             url=self.url,
             timeout=self.timeout,
             header=self.headers,
-            logger=logger,
             **self.params,
         )
 
