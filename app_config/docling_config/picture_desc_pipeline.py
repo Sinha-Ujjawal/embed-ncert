@@ -70,7 +70,7 @@ class PictureDescriptionAnalyserOpenAIApi(PictureDescAnalyser):
                 # but not all APIs will allow for it. For example, vllm won't allow more than 1.
                 assert self.retry_config is not None
 
-                @retry(self.retry_config, logger=logger)
+                @retry(self.retry_config)
                 def _api_request(image):
                     return api_image_request(
                         image=image,

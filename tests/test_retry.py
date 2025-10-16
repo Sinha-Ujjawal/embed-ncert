@@ -1,9 +1,5 @@
-import logging
-
 import pytest
 from utils.retry import RetryConfig, RetryStrategy, retry, retry_async
-
-logger = logging.getLogger(__name__)
 
 
 # Sync tests
@@ -12,7 +8,7 @@ def test_simple_retry():
     retry_config = RetryConfig(max_retries=max_retries, base_delay=0.1, jitter=False)
     ctx = {'count': 0}
 
-    @retry(retry_config, logger=logger)
+    @retry(retry_config)
     def _inner(ctx):
         ctx['count'] += 1
         assert 1 == 2, 'Deliberately raising Assertion Error'
@@ -30,7 +26,7 @@ def test_retry_success_after_failures():
     retry_config = RetryConfig(max_retries=max_retries, base_delay=0.05, jitter=False)
     ctx = {'count': 0}
 
-    @retry(retry_config, logger=logger)
+    @retry(retry_config)
     def _inner(ctx):
         ctx['count'] += 1
         if ctx['count'] < 3:
@@ -54,7 +50,7 @@ def test_retry_exponential():
     )
     ctx = {'count': 0}
 
-    @retry(retry_config, logger=logger)
+    @retry(retry_config)
     def _inner(ctx):
         ctx['count'] += 1
         raise RuntimeError('Always fail')
@@ -71,7 +67,7 @@ def test_retry_specific_exceptions():
     retry_config = RetryConfig(max_retries=3, base_delay=0.05, jitter=False)
     ctx = {'count': 0}
 
-    @retry(retry_config, logger=logger, retry_exceptions=(ValueError, ConnectionError))
+    @retry(retry_config, retry_exceptions=(ValueError, ConnectionError))
     def _inner(ctx):
         ctx['count'] += 1
         if ctx['count'] == 1:
@@ -90,7 +86,7 @@ def test_retry_no_retries():
     retry_config = RetryConfig(max_retries=0, base_delay=0.1, jitter=False)
     ctx = {'count': 0}
 
-    @retry(retry_config, logger=logger)
+    @retry(retry_config)
     def _inner(ctx):
         ctx['count'] += 1
         raise ValueError('Fail')
@@ -110,7 +106,7 @@ def test_retry_with_jitter():
     )
     ctx = {'count': 0}
 
-    @retry(retry_config, logger=logger)
+    @retry(retry_config)
     def _inner(ctx):
         ctx['count'] += 1
         raise ValueError('Always fail')
@@ -130,7 +126,7 @@ async def test_simple_retry_async():
     retry_config = RetryConfig(max_retries=max_retries, base_delay=0.1, jitter=False)
     ctx = {'count': 0}
 
-    @retry_async(retry_config, logger=logger)
+    @retry_async(retry_config)
     async def _inner(ctx):
         ctx['count'] += 1
         assert 1 == 2, 'Deliberately raising Assertion Error'
@@ -149,7 +145,7 @@ async def test_retry_async_success_after_failures():
     retry_config = RetryConfig(max_retries=max_retries, base_delay=0.05, jitter=False)
     ctx = {'count': 0}
 
-    @retry_async(retry_config, logger=logger)
+    @retry_async(retry_config)
     async def _inner(ctx):
         ctx['count'] += 1
         if ctx['count'] < 3:
@@ -174,7 +170,7 @@ async def test_retry_async_exponential():
     )
     ctx = {'count': 0}
 
-    @retry_async(retry_config, logger=logger)
+    @retry_async(retry_config)
     async def _inner(ctx):
         ctx['count'] += 1
         raise RuntimeError('Always fail')
@@ -192,7 +188,7 @@ async def test_retry_async_specific_exceptions():
     retry_config = RetryConfig(max_retries=3, base_delay=0.05, jitter=False)
     ctx = {'count': 0}
 
-    @retry_async(retry_config, logger=logger, retry_exceptions=(ValueError, ConnectionError))
+    @retry_async(retry_config, retry_exceptions=(ValueError, ConnectionError))
     async def _inner(ctx):
         ctx['count'] += 1
         if ctx['count'] == 1:
@@ -212,7 +208,7 @@ async def test_retry_async_no_retries():
     retry_config = RetryConfig(max_retries=0, base_delay=0.1, jitter=False)
     ctx = {'count': 0}
 
-    @retry_async(retry_config, logger=logger)
+    @retry_async(retry_config)
     async def _inner(ctx):
         ctx['count'] += 1
         raise ValueError('Fail')
@@ -233,7 +229,7 @@ async def test_retry_async_with_jitter():
     )
     ctx = {'count': 0}
 
-    @retry_async(retry_config, logger=logger)
+    @retry_async(retry_config)
     async def _inner(ctx):
         ctx['count'] += 1
         raise ValueError('Always fail')

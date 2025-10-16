@@ -10,7 +10,7 @@ from docling.models.utils.generation_utils import GenerationStopper
 from PIL import Image
 from pydantic import AnyUrl
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def api_image_request(
@@ -19,7 +19,6 @@ def api_image_request(
     url: AnyUrl,
     timeout: float = 20,
     headers: Optional[Dict[str, str]] = None,
-    logger: logging.Logger = _log,
     **params,
 ) -> str:
     img_io = BytesIO()
@@ -72,7 +71,6 @@ def api_image_request_streaming(
     timeout: float = 20,
     headers: Optional[Dict[str, str]] = None,
     generation_stoppers: List[GenerationStopper] = [],
-    logger: logging.Logger = _log,
     **params,
 ) -> str:
     """

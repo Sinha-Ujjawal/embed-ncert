@@ -8,6 +8,8 @@ from enum import Enum
 from functools import wraps
 from typing import Any, Type, TypeVar
 
+logger = logging.getLogger(__name__)
+
 
 class RetryStrategy(Enum):
     UNIFORM = 'uniform'
@@ -41,9 +43,7 @@ AsyncF = TypeVar('AsyncF', bound=Callable[..., Awaitable[Any]])
 
 
 def retry(
-    retry_config: RetryConfig,
-    logger: logging.Logger | None = None,
-    retry_exceptions: tuple[Type[Exception], ...] = (Exception,),
+    retry_config: RetryConfig, retry_exceptions: tuple[Type[Exception], ...] = (Exception,)
 ) -> Callable[[F], F]:
     def decorator(func: F) -> F:
         @wraps(func)
@@ -56,12 +56,10 @@ def retry(
                     return func(*args, **kwargs)
                 except retry_exceptions as e:
                     last_exception = e
-                    if logger:
-                        logger.error(f'Error occurred (attempt {attempt + 1}): {e}')
+                    logger.error(f'Error occurred (attempt {attempt + 1}): {e}')
                     if attempt < config.max_retries:
                         delay = config.get_delay(attempt)
-                        if logger:
-                            logger.info(f'Retrying in {delay:.2f}s...')
+                        logger.info(f'Retrying in {delay:.2f}s...')
                         time.sleep(delay)
 
             if last_exception:
@@ -73,9 +71,7 @@ def retry(
 
 
 def retry_async(
-    retry_config: RetryConfig,
-    logger: logging.Logger | None = None,
-    retry_exceptions: tuple[Type[Exception], ...] = (Exception,),
+    retry_config: RetryConfig, retry_exceptions: tuple[Type[Exception], ...] = (Exception,)
 ) -> Callable[[AsyncF], AsyncF]:
     def decorator(func: AsyncF) -> AsyncF:
         @wraps(func)
@@ -88,12 +84,10 @@ def retry_async(
                     return await func(*args, **kwargs)
                 except retry_exceptions as e:
                     last_exception = e
-                    if logger:
-                        logger.error(f'Error occurred (attempt {attempt + 1}): {e}')
+                    logger.error(f'Error occurred (attempt {attempt + 1}): {e}')
                     if attempt < config.max_retries:
                         delay = config.get_delay(attempt)
-                        if logger:
-                            logger.info(f'Retrying in {delay:.2f}s...')
+                        logger.info(f'Retrying in {delay:.2f}s...')
                         await asyncio.sleep(delay)
 
             if last_exception:

@@ -173,7 +173,7 @@ class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
         # Patch extract_formula_from_img with retry if config is defined
         extract_func = self.extract_formula_from_img
         if self.retry_config is not None:
-            extract_func = retry_async(self.retry_config, logger=logger)(extract_func)
+            extract_func = retry_async(self.retry_config)(extract_func)
 
         async def _submit_and_wait() -> list[NodeItem]:
             sem = asyncio.Semaphore(self.concurrency)
