@@ -31,6 +31,7 @@ docling_config:
       base_delay: 10
       strategy: "exponential"
       jitter: true
+    # min_time_per_request_in_seconds: 60  # For throttling. Will be useful when using APIs from external providers.
 
   formula_analyser: null
   text_analyser:
@@ -49,6 +50,7 @@ docling_config:
       base_delay: 10
       strategy: "exponential"
       jitter: true
+    # min_time_per_request_in_seconds: 60  # For throttling. Will be useful when using APIs from external providers.
 
 tokenizer_config:
   _target_: app_config.tokenizer_config.HuggingfaceTokenizerConfig

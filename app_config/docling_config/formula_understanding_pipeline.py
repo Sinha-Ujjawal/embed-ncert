@@ -5,6 +5,7 @@ import subprocess
 from abc import abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from datetime import timedelta
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -18,6 +19,7 @@ from PIL.Image import Image
 from pydantic.networks import AnyUrl
 from utils.api_image_request import api_image_request
 from utils.retry import RetryConfig, retry_async
+from utils.throttle import throttle_async
 
 logger = logging.getLogger(__name__)
 
@@ -156,6 +158,7 @@ class FormulaUnderstandingAnalyser:
 class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
     concurrency: int = 1
     retry_config: RetryConfig | None = None
+    min_time_per_request_in_seconds: int | None = None  # For throttling
 
     @abstractmethod
     async def extract_formula_from_img(self, image: Image) -> str:
@@ -172,6 +175,10 @@ class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
 
         # Patch extract_formula_from_img with retry if config is defined
         extract_func = self.extract_formula_from_img
+        if self.min_time_per_request_in_seconds is not None:
+            extract_func = throttle_async(timedelta(seconds=self.min_time_per_request_in_seconds))(
+                extract_func
+            )
         if self.retry_config is not None:
             extract_func = retry_async(self.retry_config)(extract_func)
 

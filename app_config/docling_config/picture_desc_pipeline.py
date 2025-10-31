@@ -2,6 +2,7 @@ import logging
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from datetime import timedelta
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -21,6 +22,7 @@ from PIL import Image
 from pydantic.networks import AnyUrl
 from utils.api_image_request import api_image_request
 from utils.retry import RetryConfig, retry
+from utils.throttle import throttle
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,7 @@ class PictureDescriptionAnalyserOpenAIApi(PictureDescAnalyser):
     prompt: str = "Describe this image in detail. Don't miss out any details."
     provenance: str = ''
     retry_config: RetryConfig | None = None
+    min_time_per_request_in_seconds: int | None = None  # For throttling of api requests
 
     def model(
         self, *, artifacts_path: Path | str | None, accelerator_options: AcceleratorOptions
@@ -63,28 +66,35 @@ class PictureDescriptionAnalyserOpenAIApi(PictureDescAnalyser):
             ),
             accelerator_options=accelerator_options,
         )
-        if self.retry_config:
-            # patch _annotate_images for implementing retry logic
-            def _patched_annotate_images(images: Iterable[Image.Image]) -> Iterable[str]:
-                # Note: technically we could make a batch request here,
-                # but not all APIs will allow for it. For example, vllm won't allow more than 1.
-                assert self.retry_config is not None
 
-                @retry(self.retry_config)
-                def _api_request(image):
-                    return api_image_request(
-                        image=image,
-                        prompt=model.options.prompt,
-                        url=model.options.url,
-                        timeout=model.options.timeout,
-                        headers=model.options.headers,
-                        **model.options.params,
-                    )
+        # patch _annotate_images for implementing retry logic
+        def _patched_annotate_images(images: Iterable[Image.Image]) -> Iterable[str]:
+            # Note: technically we could make a batch request here,
+            # but not all APIs will allow for it. For example, vllm won't allow more than 1.
 
-                with ThreadPoolExecutor(max_workers=model.concurrency) as executor:
-                    yield from executor.map(_api_request, images)
+            def _api_request(image):
+                return api_image_request(
+                    image=image,
+                    prompt=model.options.prompt,
+                    url=model.options.url,
+                    timeout=model.options.timeout,
+                    headers=model.options.headers,
+                    **model.options.params,
+                )
 
-            model._annotate_images = _patched_annotate_images
+            if self.min_time_per_request_in_seconds:
+                _api_request = throttle(timedelta(seconds=self.min_time_per_request_in_seconds))(
+                    _api_request
+                )
+
+            if self.retry_config:
+                _api_request = retry(self.retry_config)(_api_request)
+
+            with ThreadPoolExecutor(max_workers=model.concurrency) as executor:
+                yield from executor.map(_api_request, images)
+
+        model._annotate_images = _patched_annotate_images
+
         return model
 
 
