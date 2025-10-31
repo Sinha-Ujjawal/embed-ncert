@@ -1,1 +1,0 @@
-Extract text from this image. If no text in image, then output nothing. Don't add any explanation or description, just output the content of the image.

@@ -20,7 +20,7 @@ docling_config:
   picture_desc_analyser:
     _target_: app_config.docling_config.picture_desc_pipeline.PictureDescriptionAnalyserOpenAIApi
     url: "${oc.env:PICTURE_DESC_OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
-    prompt: "${read_file:assets/prompts/${oc.env:CUSTOM_PICTURE_DESC_MODEL,qwen2.5vl:7b}/picture_desc_prompt.txt}"
+    prompt: "${read_file:assets/prompts/picture_desc_prompt.txt}"
     params:
       model: "${oc.env:CUSTOM_PICTURE_DESC_MODEL,qwen2.5vl:7b}"
       temperature: 0
@@ -38,7 +38,7 @@ docling_config:
     _target_: app_config.docling_config.text_enhancer_pipeline.TextEnhancerAnalyserOpenAIApi
     allow_label_expr: "label != 'formula'"
     url: "${oc.env:TEXT_ANALYSER_OLLAMA_HOST,http://localhost:11434/}v1/chat/completions"
-    prompt: "${read_file:assets/prompts/${oc.env:CUSTOM_TEXT_ANALYSER_MODEL,qwen2.5vl:7b}/text_analyser_prompt.txt}"
+    prompt: "${read_file:assets/prompts/text_analyser_prompt.txt}"
     params:
       model: "${oc.env:CUSTOM_TEXT_ANALYSER_MODEL,qwen2.5vl:3b}"
       temperature: 0
