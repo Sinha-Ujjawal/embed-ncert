@@ -7,6 +7,10 @@ This repo is for exploring how to convert PDF documents to enriched markdown usi
 
 2. [Qdrant Vector DB](https://qdrant.tech/)
 
+3. [Ollama](https://ollama.com/download)
+
+4. [tesseract-cli](https://tesseract-ocr.github.io/tessdoc/Command-Line-Usage.html)
+
 ## Getting Started locally
 
 1. Download [uv](https://docs.astral.sh/uv/getting-started/) for managing python virtual environments. Note that this is not necessary, you can use python builtin venv as well.
