@@ -7,12 +7,29 @@ from typing import Any, Awaitable, Callable, TypeVar
 
 logger = logging.getLogger(__name__)
 
-F = TypeVar('F', bound=Callable[..., Any])
-AsyncF = TypeVar('AsyncF', bound=Callable[..., Awaitable[Any]])
+T = TypeVar('T')
 
 
-def throttle(wait_delta_time: timedelta) -> Callable[[F], F]:
-    def decorator(func: F) -> F:
+def throttle(
+    *,
+    days: int = 0,
+    seconds: int = 0,
+    microseconds: int = 0,
+    milliseconds: int = 0,
+    minutes: int = 0,
+    hours: int = 0,
+    weeks: int = 0,
+) -> Callable[[Callable[..., T]], Callable[..., T]]:
+    wait_delta_time = timedelta(
+        days=days,
+        seconds=seconds,
+        microseconds=microseconds,
+        minutes=minutes,
+        hours=hours,
+        weeks=weeks,
+    )
+
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             start = datetime.now()
@@ -25,13 +42,31 @@ def throttle(wait_delta_time: timedelta) -> Callable[[F], F]:
                     logger.info(f'Waiting for {remaining_seconds} seconds')
                     time.sleep(remaining_seconds)
 
-        return wrapper  # type: ignore
+        return wrapper
 
     return decorator
 
 
-def throttle_async(wait_delta_time: timedelta) -> Callable[[AsyncF], AsyncF]:
-    def decorator(func: AsyncF) -> AsyncF:
+def throttle_async(
+    *,
+    days: int = 0,
+    seconds: int = 0,
+    microseconds: int = 0,
+    milliseconds: int = 0,
+    minutes: int = 0,
+    hours: int = 0,
+    weeks: int = 0,
+) -> Callable[[Callable[..., Awaitable[T]]], Callable[..., Awaitable[T]]]:
+    wait_delta_time = timedelta(
+        days=days,
+        seconds=seconds,
+        microseconds=microseconds,
+        minutes=minutes,
+        hours=hours,
+        weeks=weeks,
+    )
+
+    def decorator(func: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             start = datetime.now()
@@ -44,6 +79,6 @@ def throttle_async(wait_delta_time: timedelta) -> Callable[[AsyncF], AsyncF]:
                     logger.info(f'Waiting for {remaining_seconds} seconds')
                     await asyncio.sleep(remaining_seconds)
 
-        return wrapper  # type: ignore
+        return wrapper
 
     return decorator

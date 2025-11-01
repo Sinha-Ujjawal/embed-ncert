@@ -3,13 +3,8 @@ import hashlib
 import uuid
 from glob import glob
 
-from docling.chunking import HybridChunker
-from langchain_core.documents import Document
-from langchain_docling.loader import MetaExtractor
 from load_dotenv import load_dotenv
 from tqdm.auto import tqdm
-
-from app_config import AppConfig
 
 load_dotenv()
 
@@ -36,6 +31,13 @@ def main() -> None:
         help='Path of the pdf file to process. Note that glob path is also supported.',
     )
     args = parser.parse_args()
+
+    from docling.chunking import HybridChunker
+    from langchain_core.documents import Document
+    from langchain_docling.loader import MetaExtractor
+
+    from app_config import AppConfig
+
     app_config = AppConfig.from_yaml(args.conf)
     print(f'{app_config=}')
     converter = app_config.docling_config.docling_pdf_converter()

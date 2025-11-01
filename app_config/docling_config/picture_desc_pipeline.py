@@ -2,7 +2,6 @@ import logging
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from datetime import timedelta
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -83,9 +82,7 @@ class PictureDescriptionAnalyserOpenAIApi(PictureDescAnalyser):
                 )
 
             if self.min_time_per_request_in_seconds:
-                _api_request = throttle(timedelta(seconds=self.min_time_per_request_in_seconds))(
-                    _api_request
-                )
+                _api_request = throttle(seconds=self.min_time_per_request_in_seconds)(_api_request)
 
             if self.retry_config:
                 _api_request = retry(self.retry_config)(_api_request)

@@ -23,15 +23,33 @@ uv venv && .venv/bin/activate && uv sync --frozen
 
 3. Install [tesseract-cli](https://tesseract-ocr.github.io/tessdoc/Command-Line-Usage.html). And then install tessdata for `hin`,  `eng` and `equ` from [here](https://github.com/tesseract-ocr/tessdata/tree/main).
 
-4. Run [download\_models.sh](./download_models.sh) to install all models locally. By default, it will download to the `models` folder inside the root of the project. See [.env](.env) for the config.
+4. Start Ollama server. If you don't have install it from [here](https://ollama.com/download), and then start ollama. On terminal you can
 
-5. Run [pdf\_to\_md.py](./pdf_to_md.py) to convert pdf to markdown.
+```console
+OLLAMA_DEBUG=1 OLLAMA_CONTEXT_LENGTH=10000 ollama serve
+```
+
+5. Run [download\_models.sh](./download_models.sh) to install all models locally.
+   - For Docling, it will download the docling models to the `models` folder inside the root of the project. See [.env](.env) for the config.
+   - For Huggingface, it will download the models to `~/.cache/huggingface/hub/` folder
+   - For Ollama, it will download the models to the OLLAMA\_MODELS directory. By default, it is `~/.ollama/models/`
 
 6. Run [embed\_pdf\_to\_vector\_store.py](./embed_pdf_to_vector_store.py) to embed pdf document and store in qdrant vector db.
 
 ```console
-.venv/bin/python pdf_to_md.py --conf conf/app/<lang>.yaml --pdf data/<input-pdf> --out <out>.pdf
+.venv/bin/python embed_pdf_to_vector_store.py --conf conf/app/<lang>.yaml --pdf data/<input-pdf>
 ```
+
+7. Starting the [fastapi](https://fastapi.tiangolo.com/) server:
+    - Run [mlflow](https://mlflow.org/) server for tracing
+    ```console
+    mlflow server
+    ```
+    - Run [server.py](./server.py) file using fastapi
+    ```console
+    fastapi run server.py
+    ```
+    - Then you can use visit [http://localhost:8000/docs](http://localhost:8000/docs) to see available endpoints
 
 ## Getting Started with [Docker](https://www.docker.com/)
 

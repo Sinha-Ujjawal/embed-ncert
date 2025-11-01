@@ -28,6 +28,7 @@ class AppConfig:
     docling_config: DoclingConfig
     embedding_config: EmbeddingConfig
     vector_store_config: VectorStoreConfig
+    reranking_embedding_config: EmbeddingConfig
     tokenizer_config: TokenizerConfig | None = None
 
     @staticmethod

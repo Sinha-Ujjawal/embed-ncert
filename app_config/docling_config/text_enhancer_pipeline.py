@@ -3,7 +3,6 @@ import logging
 from abc import abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import timedelta
 from typing import Any
 
 from docling.datamodel.base_models import ItemAndImageEnrichmentElement
@@ -15,6 +14,7 @@ from docling_core.types.doc.labels import DocItemLabel
 from PIL.Image import Image
 from pydantic.networks import AnyUrl
 from utils.api_image_request import api_image_request
+from utils.errors import suppress_errors_async
 from utils.retry import RetryConfig, retry_async
 from utils.throttle import throttle_async
 
@@ -37,6 +37,7 @@ class TextEnhancerAnalyserAsync(TextEnhancerAnalyser):
     concurrency: int = 1
     retry_config: RetryConfig | None = None
     min_time_per_request_in_seconds: int | None = None  # For throttling
+    suppress_errors: bool = False
 
     @abstractmethod
     async def extract_text_from_img(self, image: Image) -> str:
@@ -54,11 +55,13 @@ class TextEnhancerAnalyserAsync(TextEnhancerAnalyser):
         # Patch extract_formula_from_img with retry if config is defined
         extract_func = self.extract_text_from_img
         if self.min_time_per_request_in_seconds is not None:
-            extract_func = throttle_async(timedelta(seconds=self.min_time_per_request_in_seconds))(
+            extract_func = throttle_async(seconds=self.min_time_per_request_in_seconds)(
                 extract_func
             )
         if self.retry_config is not None:
             extract_func = retry_async(self.retry_config)(extract_func)
+        if self.suppress_errors:
+            extract_func = suppress_errors_async('')(extract_func)
 
         async def _submit_and_wait() -> list[NodeItem]:
             sem = asyncio.Semaphore(self.concurrency)

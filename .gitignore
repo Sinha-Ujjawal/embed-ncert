@@ -16,3 +16,6 @@ wheels/
 data/
 temp/
 models/
+mlartifacts/
+mlruns/
+data.db*

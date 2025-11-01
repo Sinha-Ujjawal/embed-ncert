@@ -1,4 +1,3 @@
-import os
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -29,8 +28,6 @@ from docling.pipeline.vlm_pipeline import VlmPipeline
 from load_dotenv import load_dotenv
 
 load_dotenv()
-
-DOCLING_ARTIFACTS_PATH = os.environ.get('DOCLING_ARTIFACTS_PATH')
 
 
 @dataclass(slots=True)
@@ -90,7 +87,6 @@ class VlmOCRConfig(OCRConfig):
 
     def docling_paginated_pipeline_cls_and_options(self) -> tuple[type, VlmPipelineOptions]:
         options = VlmPipelineOptions()
-        options.artifacts_path = DOCLING_ARTIFACTS_PATH
         options.generate_page_images = self.generate_page_images
         options.force_backend_text = self.force_backend_text
         options.vlm_options = self.vlm_config.vlm_options(
@@ -176,7 +172,6 @@ class StandardOCRConfig(OCRConfig):
 
     def populate_options(self, options: PdfPipelineOptions) -> None:
         options.layout_options = self.layout_model_config.docling_layout_options()
-        options.artifacts_path = DOCLING_ARTIFACTS_PATH
         options.do_ocr = True
         options.ocr_options = self.docling_ocr_options()
         # Enrichments

@@ -38,14 +38,13 @@ class RetryConfig:
         return delay
 
 
-F = TypeVar('F', bound=Callable[..., Any])
-AsyncF = TypeVar('AsyncF', bound=Callable[..., Awaitable[Any]])
+T = TypeVar('T')
 
 
 def retry(
     retry_config: RetryConfig, retry_exceptions: tuple[Type[Exception], ...] = (Exception,)
-) -> Callable[[F], F]:
-    def decorator(func: F) -> F:
+) -> Callable[[Callable[..., T]], Callable[..., T]]:
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             config = replace(retry_config)
@@ -65,15 +64,15 @@ def retry(
             if last_exception:
                 raise last_exception
 
-        return wrapper  # type: ignore
+        return wrapper
 
     return decorator
 
 
 def retry_async(
     retry_config: RetryConfig, retry_exceptions: tuple[Type[Exception], ...] = (Exception,)
-) -> Callable[[AsyncF], AsyncF]:
-    def decorator(func: AsyncF) -> AsyncF:
+) -> Callable[[Callable[..., Awaitable[T]]], Callable[..., Awaitable[T]]]:
+    def decorator(func: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             config = replace(retry_config)
@@ -93,6 +92,6 @@ def retry_async(
             if last_exception:
                 raise last_exception
 
-        return wrapper  # type: ignore
+        return wrapper
 
     return decorator

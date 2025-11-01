@@ -1,12 +1,11 @@
 import time
-from datetime import timedelta
 
 import pytest
 from utils.throttle import throttle, throttle_async
 
 
 def test_throttle_simple():
-    @throttle(timedelta(seconds=1))
+    @throttle(seconds=1)
     def fast_func():
         return 'Hello'
 
@@ -19,7 +18,7 @@ def test_throttle_simple():
 
 
 def test_throttle_slow():
-    @throttle(timedelta(seconds=1))
+    @throttle(seconds=1)
     def slow_func():
         time.sleep(2)  # sleeping for 5 seconds
         return 'Hello'
@@ -38,7 +37,7 @@ def test_throttle_with_exception():
             Exception.__init__(self)
             self.value = value
 
-    @throttle(timedelta(seconds=1))
+    @throttle(seconds=1)
     def fail_func():
         raise CustomException(value='Hello')
 
@@ -56,7 +55,7 @@ def test_throttle_with_exception():
 
 @pytest.mark.asyncio
 async def test_throttle_async_simple():
-    @throttle_async(timedelta(seconds=1))
+    @throttle_async(seconds=1)
     async def fast_func():
         return 'Hello'
 
@@ -70,7 +69,7 @@ async def test_throttle_async_simple():
 
 @pytest.mark.asyncio
 async def test_throttle_async_slow():
-    @throttle_async(timedelta(seconds=1))
+    @throttle_async(seconds=1)
     async def slow_func():
         time.sleep(2)  # sleeping for 5 seconds
         return 'Hello'
@@ -90,7 +89,7 @@ async def test_throttle_async_with_exception():
             Exception.__init__(self)
             self.value = value
 
-    @throttle_async(timedelta(seconds=1))
+    @throttle_async(seconds=1)
     async def fail_func():
         raise CustomException(value='Hello')
 

@@ -5,7 +5,6 @@ import subprocess
 from abc import abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import timedelta
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -176,7 +175,7 @@ class FormulaUnderstandingAnalyserAsync(FormulaUnderstandingAnalyser):
         # Patch extract_formula_from_img with retry if config is defined
         extract_func = self.extract_formula_from_img
         if self.min_time_per_request_in_seconds is not None:
-            extract_func = throttle_async(timedelta(seconds=self.min_time_per_request_in_seconds))(
+            extract_func = throttle_async(seconds=self.min_time_per_request_in_seconds)(
                 extract_func
             )
         if self.retry_config is not None:
