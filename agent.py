@@ -9,7 +9,8 @@ from typing import Any, Iterator, Sequence
 
 import mlflow
 from dotenv import load_dotenv
-from langchain_community.vectorstores import FAISS
+
+# from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessageChunk, AnyMessage, HumanMessage
 from langchain_core.prompts import PromptTemplate
@@ -30,8 +31,9 @@ class AgentRequest:
     thread_id: str
     question: str
     conf: str
-    k: int = 100  # Max no. of relevant docs to retrieve from Vector Store
-    reranking_k: int = 5  # Max no. of relevant docs to retrieve while reranking
+    k: int = 5  # Max no. of relevant docs to retrieve from Vector Store
+    # TODO: WHEN RERANKING IS ENABLED, THEN DONT FORGET TO SET THE ABOVE K TO A HIGHER NUMBER, e.g- 100?
+    # reranking_k: int = 5  # Max no. of relevant docs to retrieve while reranking
     min_words: int = 5
 
 
@@ -57,9 +59,10 @@ def retrieve_relevant_docs(request: AgentRequest) -> Sequence[Document]:
     retriever = vector_store.as_retriever()
     docs = retriever.invoke(input=request.question, k=request.k)
     docs = [doc for doc in docs if len(doc.page_content.split()) >= request.min_words]
-    reranking_embeddings = app_config.reranking_embedding_config.langchain_embedding()
-    reranking_retriever = FAISS.from_documents(docs, embedding=reranking_embeddings).as_retriever()
-    docs = reranking_retriever.invoke(input=request.question, k=request.reranking_k)
+    # TODO: MAKE RERANKER FAST
+    # reranking_embeddings = app_config.reranking_embedding_config.langchain_embedding()
+    # reranking_retriever = FAISS.from_documents(docs, embedding=reranking_embeddings).as_retriever()
+    # docs = reranking_retriever.invoke(input=request.question, k=request.reranking_k)
     return docs
 
 
