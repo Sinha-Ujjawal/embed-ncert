@@ -83,12 +83,9 @@ def qa_using_llm(
             1. Read through ALL the provided context chunks carefully
             2. Each chunk has a unique "Chunk ID" (e.g., chunk_001, chunk_002, etc.)
             3. Only use information from chunks that are directly relevant to answering the question
-            4. In your final chunk_ids list, include ONLY the exact chunk IDs that contributed to your answer
 
             # Conversation History:
-            <conversation_history>
             {conversation_history}
-            </conversation_history>
 
             # Current Question:
             {question}
@@ -103,6 +100,7 @@ def qa_using_llm(
             # CRITICAL
             - ONLY MENTION THE CHUNKS THAT IS RELEVANT TO THE QUESTION
             - MAINTAIN CONVERSATION CONTINUITY WHILE GROUNDING YOUR ANSWER IN THE NEW CONTEXT
+            - MAKE SURE TO ANSWER THE QUESTION
             """),
         input_variables=['conversation_history', 'question', 'context'],
     )
