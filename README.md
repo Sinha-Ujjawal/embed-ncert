@@ -38,13 +38,15 @@ OLLAMA_DEBUG=1 OLLAMA_CONTEXT_LENGTH=10000 ollama serve
    - For Huggingface, it will download the models to `~/.cache/huggingface/hub/` folder
    - For Ollama, it will download the models to the OLLAMA\_MODELS directory. By default, it is `~/.ollama/models/`
 
-6. Run [embed\_pdf\_to\_vector\_store.py](./embed_pdf_to_vector_store.py) to embed pdf document and store in qdrant vector db.
+6. Start Qdrant DB using Docker [Refer](https://qdrant.tech/documentation/quickstart/#download-and-run)
+
+7. Run [embed\_pdf\_to\_vector\_store.py](./embed_pdf_to_vector_store.py) to embed pdf document and store in qdrant vector db.
 
 ```console
 .venv/bin/python embed_pdf_to_vector_store.py --conf conf/app/<lang>.yaml --pdf data/<input-pdf>
 ```
 
-7. Starting the [fastapi](https://fastapi.tiangolo.com/) server:
+8. Starting the [fastapi](https://fastapi.tiangolo.com/) server:
     - Run [mlflow](https://mlflow.org/) server for tracing
     ```console
     mlflow server
@@ -54,6 +56,7 @@ OLLAMA_DEBUG=1 OLLAMA_CONTEXT_LENGTH=10000 ollama serve
     fastapi run server.py
     ```
     - Then you can use visit [http://localhost:8000/docs](http://localhost:8000/docs) to see available endpoints
+    - Refer [Probe.ipynb](./Probe.ipynb) to see example to use the api. Currently we have a way to ask question, and also continue on the thread
 
 ## Getting Started with [Docker](https://www.docker.com/)
 
