@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import StrEnum
+from pathlib import Path
 from textwrap import dedent
 from typing import Any, Iterator, Sequence
 
@@ -24,6 +25,8 @@ load_dotenv()
 mlflow.langchain.autolog()
 
 logger = logging.getLogger()
+
+PROJECT_ROOT = Path(__file__).parent
 
 
 @dataclass(slots=True)
@@ -55,8 +58,7 @@ class AgentResponse:
 def retrieve_relevant_docs(request: AgentRequest) -> Sequence[Document]:
     app_config = AppConfig.from_yaml(request.conf)
     embeddings = app_config.embedding_config.langchain_embedding()
-    vector_store = app_config.vector_store_config.get_vectorstore(embeddings)
-    retriever = vector_store.as_retriever()
+    retriever = app_config.vector_store_config.get_retriever(embeddings)
     docs = retriever.invoke(input=request.question, k=request.k)
     docs = [doc for doc in docs if len(doc.page_content.split()) >= request.min_words]
     # TODO: MAKE RERANKER FAST
@@ -75,58 +77,7 @@ def qa_using_llm(
     batch_size: int = 32,
 ) -> Iterator[Sequence[AIMessageChunk]]:
     rag_prompt_template = PromptTemplate(
-        template=dedent("""
-You are a knowledgeable assistant specializing in question-answering tasks. Your role is to provide accurate, relevant answers based on retrieved context while maintaining natural conversation flow.
-
-## TASK OVERVIEW
-Analyze the provided context chunks and answer the user's question by synthesizing relevant information. Each context chunk has a unique identifier for citation purposes.
-
-## CONVERSATION HISTORY
-{conversation_history}
-
-## CURRENT QUESTION
-{question}
-
-## RETRIEVED CONTEXT
-{context}
-
-## RESPONSE GUIDELINES
-
-### 1. Context Analysis
-- Carefully read ALL context chunks before formulating your answer
-- Identify which chunks contain information relevant to the question
-- Ignore chunks that don't contribute to answering the question
-
-### 2. Answer Construction
-- Provide a clear, direct answer to the question
-- Synthesize information from multiple relevant chunks when applicable
-- Maintain conversation continuity by referencing previous exchanges when appropriate
-- Use natural language - avoid robotic or overly formal responses
-
-### 3. Citation Format
-- Cite each piece of information using the format: [$chunk_id]
-- Place citations immediately after the relevant statement
-- Example: "The process takes 3-5 business days [$chunk_003]"
-- Only cite chunks that directly support your statements
-
-### 4. Quality Standards
-- **Accuracy**: Only use information present in the provided context
-- **Relevance**: Focus on answering the specific question asked
-- **Completeness**: Address all parts of multi-part questions
-- **Conciseness**: Be thorough but avoid unnecessary elaboration
-- **Honesty**: If the context doesn't contain sufficient information, clearly state this
-
-## CRITICAL RULES
-❌ DO NOT cite chunks that aren't relevant to your answer
-❌ DO NOT invent or assume information not in the context
-❌ DO NOT ignore the conversation history when it provides important context
-✅ DO cite every factual claim with the appropriate chunk ID
-✅ DO maintain a helpful, conversational tone
-✅ DO answer the question directly and completely
-
-## RESPONSE FORMAT
-Provide your answer in natural prose with inline citations. Begin answering immediately without preambles like "Based on the context..."
-            """),
+        template=dedent((PROJECT_ROOT / './assets/prompts/agent.txt').read_text()),
         input_variables=['conversation_history', 'question', 'context'],
     )
 
@@ -228,5 +179,6 @@ def workflow(request: AgentRequest, mlflow_run_id: str) -> Iterator[AgentRespons
 
 
 def run_workflow(request: AgentRequest) -> Iterator[AgentResponse]:
+    load_dotenv(override=True)
     with mlflow.start_run(run_name=f'run_{request.thread_id}') as run:
         yield from workflow(request, mlflow_run_id=run.info.run_id)

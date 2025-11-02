@@ -4,12 +4,18 @@ from typing import Any, Iterable
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
+from langchain_core.retrievers import BaseRetriever
 from langchain_core.vectorstores import VectorStore
 from langchain_qdrant import QdrantVectorStore
 
 
 @dataclass
 class VectorStoreConfig:
+    retriever_kwargs: dict[str, Any] = field(default_factory=lambda: {})
+
+    def get_retriever(self, embeddings: Embeddings) -> BaseRetriever:
+        return self.get_vectorstore(embeddings).as_retriever(**self.retriever_kwargs)
+
     @abstractmethod
     def get_vectorstore(self, embeddings: Embeddings) -> VectorStore:
         raise NotImplementedError
@@ -21,7 +27,7 @@ class VectorStoreConfig:
 
 @dataclass
 class QdrantVectorStoreConfig(VectorStoreConfig):
-    collection_name: str
+    collection_name: str = ''
     client_opts: dict[str, Any] = field(default_factory=lambda: {})
     addnl_conf: dict[str, Any] = field(default_factory=lambda: {})
 

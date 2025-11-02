@@ -70,6 +70,11 @@ vector_store_config:
   client_opts:
     url: http://localhost:6333
   collection_name: default
+  retriever_kwargs:
+    search_type: "mmr"
+    search_kwargs:
+        k: 5
+        fetch_k: 20
 
 reranking_embedding_config:
   _target_: app_config.embedding_config.OllamaEmbeddingConfig

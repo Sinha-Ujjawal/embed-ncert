@@ -43,6 +43,7 @@ def save_messages_to_db(
 
 def fetch_history_from_db(thread_id: str) -> Sequence[AnyMessage]:
     with sqlite3.connect(SQLITE3_DB) as conn:
+        conn.execute('pragma journal_mode = WAL;')
         records = conn.execute(
             """
             select timestamp_utc, messages
