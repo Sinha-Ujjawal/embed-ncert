@@ -2,13 +2,15 @@ import json
 import os
 import uuid
 from enum import StrEnum
-from typing import Any, Iterator
+from typing import Annotated, Any, Iterator, Sequence
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
+from langchain_core.messages.utils import AnyMessage
 from pydantic import BaseModel
 
 import agent
+from db import fetch_history_from_db
 
 app = FastAPI()
 
@@ -78,3 +80,17 @@ async def query(request: QueryRequest) -> StreamingResponse:
 
     stream = stream_objs(map(lambda x: x.model_dump(), stream_generator()))
     return StreamingResponse(stream, media_type='application/json')
+
+
+class HistoryResponse(BaseModel):
+    thread_id: str
+    messages: Sequence[AnyMessage]
+
+
+@app.get('/history/')
+async def history(
+    thread_id: Annotated[
+        str, Query(title='thread_id', description='`thread_id` of the conversation thread')
+    ],
+) -> HistoryResponse:
+    return HistoryResponse(thread_id=thread_id, messages=fetch_history_from_db(thread_id))

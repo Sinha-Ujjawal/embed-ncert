@@ -1,6 +1,4 @@
 import os
-import pickle
-import sqlite3
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -12,17 +10,16 @@ import mlflow
 from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
-from langchain_core.messages import AIMessage, AIMessageChunk, AnyMessage, HumanMessage
+from langchain_core.messages import AIMessageChunk, AnyMessage, HumanMessage
 from langchain_core.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
 
 from app_config import AppConfig
+from db import ensure_tables, fetch_history_from_db, save_messages_to_db
 
 load_dotenv()
 
 mlflow.langchain.autolog()
-
-SQLITE3_DB = './data.db'
 
 
 @dataclass(slots=True)
@@ -47,71 +44,6 @@ class AgentResponse:
     status: Status
     message: str
     data: dict[str, Any] = field(default_factory=lambda: {})
-
-
-def ensure_tables():
-    with sqlite3.connect(SQLITE3_DB) as conn:
-        conn.execute('pragma journal_mode = WAL;')
-        conn.execute("""create table if not exists agent_conversation_history (
-            thread_id     text     not null,
-            mlflow_run_id text     not null,
-            timestamp_utc datetime not null,
-            chunk_id      integer  not null,
-            messages      blob     not null
-        )""")
-
-
-def save_messages_to_db(
-    *,
-    thread_id: str,
-    mlflow_run_id: str,
-    timestamp_utc: datetime,
-    chunk_id: int,
-    messages: Sequence[AnyMessage],
-):
-    with sqlite3.connect(SQLITE3_DB) as conn:
-        conn.execute('pragma journal_mode = WAL;')
-        conn.execute(
-            """
-            insert into agent_conversation_history
-            (thread_id, mlflow_run_id, timestamp_utc, chunk_id, messages)
-            values
-            (?, ?, ?, ?, ?);
-            """,
-            (thread_id, mlflow_run_id, timestamp_utc, chunk_id, pickle.dumps(messages)),
-        )
-
-
-def fetch_history_from_fb(thread_id: str) -> Sequence[AnyMessage]:
-    with sqlite3.connect(SQLITE3_DB) as conn:
-        records = conn.execute(
-            """
-            select timestamp_utc, messages
-            from agent_conversation_history
-            where thread_id = ?
-            order by timestamp_utc asc
-            """,
-            (thread_id,),
-        ).fetchall()
-    messages: Sequence[HumanMessage | AIMessageChunk] = [
-        msg
-        for _, blob in sorted(records, key=lambda record: record[0])
-        for msg in pickle.loads(blob)
-    ]
-    compressed: Sequence[HumanMessage | AIMessage] = []
-    current_running_ai_messages: Sequence[str] = []
-    for message in messages:
-        if isinstance(message, HumanMessage):
-            if current_running_ai_messages:
-                compressed.append(AIMessage(content=''.join(current_running_ai_messages)))
-                current_running_ai_messages.clear()
-            compressed.append(message)
-        elif isinstance(message, AIMessage):
-            current_running_ai_messages.append(str(message.content))
-    if current_running_ai_messages:
-        compressed.append(AIMessage(content=''.join(current_running_ai_messages)))
-        current_running_ai_messages.clear()
-    return compressed  # type: ignore
 
 
 @mlflow.trace
@@ -212,7 +144,7 @@ def workflow(request: AgentRequest, mlflow_run_id: str) -> Iterator[AgentRespons
     ensure_tables()
 
     yield make_res(Status.IN_PROGRESS, 'Retrieve history...')
-    history = fetch_history_from_fb(request.thread_id)
+    history = fetch_history_from_db(request.thread_id)
     yield make_res(Status.DONE, 'History fetched', history=[msg.dict() for msg in history])
 
     with ThreadPoolExecutor() as executor:
