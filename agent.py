@@ -1,3 +1,4 @@
+import logging
 import os
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
@@ -20,6 +21,8 @@ from db import ensure_tables, fetch_history_from_db, save_messages_to_db
 load_dotenv()
 
 mlflow.langchain.autolog()
+
+logger = logging.getLogger()
 
 
 @dataclass(slots=True)
@@ -130,6 +133,8 @@ def qa_using_llm(
 
 @mlflow.trace
 def workflow(request: AgentRequest, mlflow_run_id: str) -> Iterator[AgentResponse]:
+    logger.info(f'Agent started with {request=}')
+
     def make_res(status: Status, message: str, **kwargs) -> AgentResponse:
         return AgentResponse(
             thread_id=request.thread_id,
@@ -144,8 +149,10 @@ def workflow(request: AgentRequest, mlflow_run_id: str) -> Iterator[AgentRespons
     ensure_tables()
 
     yield make_res(Status.IN_PROGRESS, 'Retrieve history...')
+    logger.info('Retrieving history...')
     history = fetch_history_from_db(request.thread_id)
     yield make_res(Status.DONE, 'History fetched', history=[msg.dict() for msg in history])
+    logger.info('History fetched')
 
     with ThreadPoolExecutor() as executor:
         futs.append(
@@ -160,10 +167,13 @@ def workflow(request: AgentRequest, mlflow_run_id: str) -> Iterator[AgentRespons
         )
 
         yield make_res(Status.IN_PROGRESS, 'Retrieve relevant docs...')
+        logger.info('Retrieve relevant docs...')
         docs = retrieve_relevant_docs(request)
         yield make_res(Status.DONE, 'Relevant docs retrieved', docs=[doc.dict() for doc in docs])
+        logger.info('Relevant docs retrieved')
 
         yield make_res(Status.IN_PROGRESS, 'Asking the question to LLM with relevant docs')
+        logger.info('Asking LLM')
         llm_chunks: Sequence[AIMessageChunk]
         for batch_idx, llm_chunks in enumerate(
             qa_using_llm(request=request, history=history, docs=docs), 1
@@ -173,6 +183,7 @@ def workflow(request: AgentRequest, mlflow_run_id: str) -> Iterator[AgentRespons
                 f'Generated batch: {batch_idx}',
                 llm_chunks=[chunk.dict() for chunk in llm_chunks],
             )
+            logger.info(f'LLM Batch: {batch_idx} Response Sent')
             futs.append(
                 executor.submit(
                     save_messages_to_db,
@@ -184,6 +195,7 @@ def workflow(request: AgentRequest, mlflow_run_id: str) -> Iterator[AgentRespons
                 )
             )
         yield make_res(Status.DONE, 'All chunks generated', workflow_completed=True)
+        logger.info('All chunks sent')
         wait(futs)
         for fut in futs:
             fut.result()
