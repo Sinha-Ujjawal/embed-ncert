@@ -43,16 +43,26 @@ OLLAMA_DEBUG=1 OLLAMA_CONTEXT_LENGTH=10000 ollama serve
 7. Run [embed\_pdf\_to\_vector\_store.py](./embed_pdf_to_vector_store.py) to embed pdf document and store in qdrant vector db.
 
 ```console
-.venv/bin/python embed_pdf_to_vector_store.py --conf conf/app/<lang>.yaml --pdf data/<input-pdf>
+source .venv/bin/python
+python embed_pdf_to_vector_store.py --conf conf/app/<lang>.yaml --pdf data/<input-pdf>
 ```
 
-8. Starting the [fastapi](https://fastapi.tiangolo.com/) server:
+8. Run [alembic](https://alembic.sqlalchemy.org/en/latest/) migrations to setup db
+
+```console
+source .venv/bin/python
+alembic upgrade head
+```
+
+9. Starting the [fastapi](https://fastapi.tiangolo.com/) server:
     - Run [mlflow](https://mlflow.org/) server for tracing
     ```console
+    source .venv/bin/python
     mlflow server
     ```
     - Run [server.py](./server.py) file using fastapi
     ```console
+    source .venv/bin/python
     fastapi run server.py
     ```
     - Then you can use visit [http://localhost:8000/docs](http://localhost:8000/docs) to see available endpoints
