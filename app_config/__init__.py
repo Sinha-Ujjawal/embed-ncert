@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from load_dotenv import load_dotenv
+from mem0.configs.base import MemoryConfig
 from omegaconf import OmegaConf
 from utils.hydra_utils import instantiate_filtered
 
@@ -29,6 +30,7 @@ class AppConfig:
     embedding_config: EmbeddingConfig
     vector_store_config: VectorStoreConfig
     reranking_embedding_config: EmbeddingConfig
+    mem0_config: MemoryConfig
     tokenizer_config: TokenizerConfig | None = None
 
     @staticmethod

@@ -2,13 +2,10 @@ import json
 import os
 import uuid
 from enum import StrEnum
-from functools import reduce
-from operator import __add__
 from typing import Annotated, Any, Iterator, Sequence
 
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
-from langchain_core.messages import AIMessage
 from langchain_core.messages.utils import AnyMessage
 from pydantic import BaseModel
 
@@ -66,9 +63,8 @@ async def query(request: QueryRequest) -> StreamingResponse:
     def stream_generator() -> Iterator[QueryResponse]:
         for agent_response in agent.run_workflow(agent_request):
             ai_response = agent_response.ai_response
-            if ai_response is not None and ai_response.llm_chunks:
-                combined_message: AIMessage = reduce(__add__, ai_response.llm_chunks)
-                additional_data = combined_message.additional_kwargs
+            if ai_response is not None:
+                additional_data = ai_response.message.additional_kwargs
                 if 'reasoning_content' in additional_data:
                     yield QueryResponse(
                         thread_id=agent_response.thread_id,
@@ -78,14 +74,14 @@ async def query(request: QueryRequest) -> StreamingResponse:
                         response_type=QueryResponseType.REASONING,
                         response=additional_data['reasoning_content'],
                     )
-                if combined_message.content:
+                if ai_response.message.content:
                     yield QueryResponse(
                         thread_id=agent_response.thread_id,
                         mlflow_run_id=agent_response.mlflow_run_id,
                         model_repr=ai_response.model_repr,
                         tag=ai_response.tag,
                         response_type=QueryResponseType.CONTENT,
-                        response=str(combined_message.content),
+                        response=str(ai_response.message.content),
                     )
 
     stream = stream_objs(map(lambda x: x.model_dump(), stream_generator()))
