@@ -60,10 +60,10 @@ alembic upgrade head
     source .venv/bin/python
     mlflow server
     ```
-    - Run [server.py](./server.py) file using fastapi
+    - Run [serve\_local.py](./serve_local.py) file using fastapi
     ```console
     source .venv/bin/python
-    fastapi run server.py
+    fastapi run serve_local.py
     ```
     - Then you can use visit [http://localhost:8000/docs](http://localhost:8000/docs) to see available endpoints
     - Refer [Probe.ipynb](./Probe.ipynb) to see example to use the api. Currently we have a way to ask question, and also continue on the thread
