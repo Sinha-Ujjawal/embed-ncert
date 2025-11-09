@@ -68,6 +68,16 @@ alembic upgrade head
     - Then you can use visit [http://localhost:8000/docs](http://localhost:8000/docs) to see available endpoints
     - Refer [Probe.ipynb](./Probe.ipynb) to see example to use the api. Currently we have a way to ask question, and also continue on the thread
 
+10. [Optional] Run [kuzudb explorer](https://github.com/kuzudb/explorer) for visualizing the mem0 knowledge graph
+
+```console
+docker run -p 8001:8000 \
+           -v `pwd`:/database \
+           -e KUZU_FILE=mem0_knowledge_graph.kuzu \
+           --rm kuzudb/explorer:latest
+```
+Then got to [http://localhost:8001](http://localhost:8001) to see the Kuzu Explorer
+
 ## Getting Started with [Docker](https://www.docker.com/)
 
 TODO

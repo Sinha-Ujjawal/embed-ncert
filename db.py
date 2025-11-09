@@ -37,6 +37,7 @@ def save_messages_to_db(
                 pickle.dumps(messages),
             ),
         )
+        conn.commit()
 
 
 def fetch_history_from_db(thread_id: str) -> Sequence[AnyMessage]:
