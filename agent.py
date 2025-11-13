@@ -18,12 +18,13 @@ from langchain_core.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
 from mem0 import Memory
 
+import utils.patch_mem0 as _  # noqa
 from app_config import AppConfig
 from db import save_messages_to_db
 from utils.batch import batched
 from utils.mlflow_utils import mlflow_trace
 
-load_dotenv()
+load_dotenv(override=True)
 
 mlflow.langchain.autolog()
 

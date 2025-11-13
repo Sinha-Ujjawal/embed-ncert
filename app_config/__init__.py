@@ -14,7 +14,7 @@ from app_config.vector_store_config import VectorStoreConfig
 PROJECT_ROOT_PATH = Path(__file__).parent.parent
 DEFAULT_CONFIG = PROJECT_ROOT_PATH / 'conf/app/default.yaml'
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def read_file_resolver(path: str) -> str:

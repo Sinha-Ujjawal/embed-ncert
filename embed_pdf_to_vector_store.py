@@ -6,7 +6,7 @@ from glob import glob
 from load_dotenv import load_dotenv
 from tqdm.auto import tqdm
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def make_doc_id(content: str) -> str:

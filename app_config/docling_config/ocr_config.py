@@ -27,7 +27,7 @@ from docling.pipeline.threaded_standard_pdf_pipeline import ThreadedStandardPdfP
 from docling.pipeline.vlm_pipeline import VlmPipeline
 from load_dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 @dataclass(slots=True)
