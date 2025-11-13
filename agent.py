@@ -9,6 +9,7 @@ from textwrap import dedent
 from typing import Any, Iterator, Sequence
 
 import mlflow
+import mlflow.langchain as mlflow_langchain
 from dotenv import load_dotenv
 
 # from langchain_community.vectorstores import FAISS
@@ -18,6 +19,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
 from mem0 import Memory
 
+import utils.mlflow_ollama as mlflow_ollama
 import utils.patch_mem0 as _  # noqa
 from app_config import AppConfig
 from db import save_messages_to_db
@@ -26,7 +28,8 @@ from utils.mlflow_utils import mlflow_trace
 
 load_dotenv(override=True)
 
-mlflow.langchain.autolog()
+mlflow_langchain.autolog()
+mlflow_ollama.autolog()
 
 logger = logging.getLogger()
 
