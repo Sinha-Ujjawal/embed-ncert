@@ -19,3 +19,5 @@ models/
 mlartifacts/
 mlruns/
 data.db*
+mem0_history.db*
+mem0_knowledge_graph.kuzu*

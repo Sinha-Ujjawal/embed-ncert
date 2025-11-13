@@ -5,7 +5,7 @@ from load_dotenv import load_dotenv
 
 from app_config import AppConfig
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def main() -> None:

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from load_dotenv import load_dotenv
+from mem0.configs.base import MemoryConfig
 from omegaconf import OmegaConf
 from utils.hydra_utils import instantiate_filtered
 
@@ -13,7 +14,7 @@ from app_config.vector_store_config import VectorStoreConfig
 PROJECT_ROOT_PATH = Path(__file__).parent.parent
 DEFAULT_CONFIG = PROJECT_ROOT_PATH / 'conf/app/default.yaml'
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def read_file_resolver(path: str) -> str:
@@ -29,6 +30,7 @@ class AppConfig:
     embedding_config: EmbeddingConfig
     vector_store_config: VectorStoreConfig
     reranking_embedding_config: EmbeddingConfig
+    mem0_config: MemoryConfig
     tokenizer_config: TokenizerConfig | None = None
 
     @staticmethod
