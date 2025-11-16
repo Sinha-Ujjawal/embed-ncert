@@ -48,4 +48,5 @@ docstring-code-format = true
 [dependency-groups]
 dev = [
     "jupyterlab>=4.4.10",
+    "toml-to-requirements"
 ]
