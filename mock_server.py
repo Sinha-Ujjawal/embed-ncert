@@ -1,14 +1,25 @@
+import time
 from enum import StrEnum
 from functools import wraps
 from typing import Any, Callable, Iterator, ParamSpec
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
+
 
 # -- Type Variables ---
 P = ParamSpec('P')
@@ -107,6 +118,8 @@ def convo(request: ConvoRequest) -> Iterator[ConvoResponse]:
         )
 
     for word in LOREM_IPSUM.split():
+        time.sleep(0.5)
         yield mk_convo_res(word, ConvoResponseType.REASONING)
     for word in LOREM_IPSUM.split():
+        time.sleep(0.5)
         yield mk_convo_res(word, ConvoResponseType.CONTENT)
