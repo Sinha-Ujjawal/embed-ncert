@@ -119,7 +119,7 @@ def convo(request: ConvoRequest) -> Iterator[ConvoResponse]:
 
     for word in LOREM_IPSUM.split():
         time.sleep(0.5)
-        yield mk_convo_res(word, ConvoResponseType.REASONING)
+        yield mk_convo_res(word + ' ', ConvoResponseType.REASONING)
     for word in LOREM_IPSUM.split():
         time.sleep(0.5)
-        yield mk_convo_res(word, ConvoResponseType.CONTENT)
+        yield mk_convo_res(word + ' ', ConvoResponseType.CONTENT)
