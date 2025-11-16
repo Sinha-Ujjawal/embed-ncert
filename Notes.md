@@ -1,8 +1,16 @@
 ## TODOS
-- Implement pagination in `/history`
-- Implement user auth
-- Only allow single request per thread\_id
-- ...
+- Check how are chunks getting stored in Qdrant DB. We need to ensure that both heading and content are stored together in same chunk, or there is some sort of relationship between the chunks. Check docling document.
+- APIs to be implemented
+  - Implement pagination in `/history`
+  - Only allow single request per thread\_id
+  - API for list of ingested subjects
+  - Books and Chapters in Subjects
+  - Login and Auth
+    - OTP based on Mobile
+  - User Stats
+    - Watch time
+    - ...
+  - ...
 
 ## DONE
 See [embed\_pdf\_to\_vector\_store.py](./embed_pdf_to_vector_store.py)
